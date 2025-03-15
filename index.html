@@ -10,16 +10,63 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA3PUO73p9_03jQEQC592HeJ72tDdNVsKc" defer></script>
+  <style>
+    .debug-box {
+      padding: 20px;
+      margin: 20px;
+      border: 1px solid #ddd;
+      background-color: #f9f9f9;
+      color: black;
+    }
+    .error {
+      color: red;
+      background-color: #ffeeee;
+      padding: 10px;
+      margin: 10px 0;
+      border-left: 3px solid red;
+    }
+  </style>
 </head>
 <body>
-  <h1 style="color: black; padding: 20px;">测试页面</h1>
+  <div class="debug-box">
+    <h1>日本房源搜索 - 调试页面</h1>
+    <p>如果您看到此内容，说明HTML已正确加载</p>
+    <div id="js-test"></div>
+  </div>
+  
   <div id="root"></div>
   
-  <!-- 添加内联脚本测试 -->
+  <!-- 内联脚本测试 -->
   <script>
-    document.body.innerHTML += '<p style="color: red; padding: 20px;">基本JavaScript执行正常</p>';
+    document.getElementById('js-test').innerHTML = '<p>内联JavaScript正常工作</p>';
+    
+    // 记录页面加载
+    console.log('页面已加载', new Date().toISOString());
+    
+    // 捕获全局错误
+    window.addEventListener('error', function(event) {
+      console.error('全局错误:', event.error);
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error';
+      errorDiv.textContent = '错误: ' + event.message;
+      document.querySelector('.debug-box').appendChild(errorDiv);
+    });
+    
+    // 尝试加载index.js
+    function loadScript() {
+      const script = document.createElement('script');
+      script.src = 'src/index.js';
+      script.onerror = function() {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error';
+        errorDiv.textContent = '无法加载index.js脚本';
+        document.querySelector('.debug-box').appendChild(errorDiv);
+      };
+      document.body.appendChild(script);
+    }
+    
+    // 延迟加载脚本
+    setTimeout(loadScript, 500);
   </script>
-  
-  <script src="src/index.js" type="module"></script>
 </body>
 </html> 
