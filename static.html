@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="日本房源搜索 - 极简风格的日本房产搜索引擎">
+  <title>日本房源搜索 - 静态版本</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* 内联基本样式，以防main.css加载失败 */
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      color: #333;
+      background-color: #f5f5f5;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    header {
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    
+    nav ul {
+      display: flex;
+      gap: 20px;
+      list-style: none;
+    }
+    
+    nav a {
+      text-decoration: none;
+      color: #333;
+    }
+    
+    .view-toggle {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    
+    .view-toggle button {
+      background-color: white;
+      border: 1px solid #e0e0e0;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .view-toggle button:first-child {
+      border-radius: 4px 0 0 4px;
+    }
+    
+    .view-toggle button:last-child {
+      border-radius: 0 4px 4px 0;
+    }
+    
+    .view-toggle button.active {
+      background-color: #1a1a1a;
+      color: white;
+    }
+    
+    .filters {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    
+    .property-card {
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    
+    .property-image {
+      height: 200px;
+      background-color: #eee;
+      position: relative;
+    }
+    
+    .property-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .property-content {
+      padding: 15px;
+    }
+    
+    .property-price {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #ff4d4d;
+      margin-bottom: 5px;
+    }
+    
+    .list-view {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-container container">
+      <div class="logo">日本房源搜索</div>
+      <nav>
+        <ul>
+          <li><a href="#">首页</a></li>
+          <li><a href="#">收藏</a></li>
+          <li><a href="#">关于</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  
+  <main class="container">
+    <div class="view-toggle">
+      <button class="active">列表视图</button>
+      <button>地图视图</button>
+    </div>
+    
+    <div class="filters">
+      <h3>筛选条件</h3>
+      <form>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+          <div>
+            <label for="location" style="display: block; margin-bottom: 5px;">地区</label>
+            <input type="text" id="location" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;" placeholder="输入地区、地址或车站">
+          </div>
+          
+          <div>
+            <label for="priceMin" style="display: block; margin-bottom: 5px;">最低价格 (¥)</label>
+            <input type="number" id="priceMin" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;" placeholder="最低价格">
+          </div>
+          
+          <div>
+            <label for="priceMax" style="display: block; margin-bottom: 5px;">最高价格 (¥)</label>
+            <input type="number" id="priceMax" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;" placeholder="最高价格">
+          </div>
+          
+          <div>
+            <label for="rooms" style="display: block; margin-bottom: 5px;">房间数</label>
+            <select id="rooms" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              <option value="">不限</option>
+              <option value="1">1R/1K</option>
+              <option value="1.5">1DK/1LDK</option>
+              <option value="2">2K/2DK</option>
+              <option value="2.5">2LDK</option>
+              <option value="3">3K/3DK/3LDK</option>
+              <option value="4">4K以上</option>
+            </select>
+          </div>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; margin-top: 15px;">
+          <button type="button" style="background-color: transparent; border: 1px solid #e0e0e0; padding: 8px 16px; border-radius: 4px; margin-right: 10px; cursor: pointer;">
+            重置筛选
+          </button>
+          <button type="submit" style="background-color: #ff4d4d; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+            应用筛选
+          </button>
+        </div>
+      </form>
+    </div>
+    
+    <div class="list-view">
+      <!-- 房源卡片1 -->
+      <div class="property-card">
+        <div class="property-image">
+          <img src="https://picsum.photos/id/101/600/400" alt="房源图片">
+          <div style="position: absolute; top: 10px; right: 10px; background-color: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+            3个来源
+          </div>
+        </div>
+        <div class="property-content">
+          <div class="property-price">125.5万円</div>
+          <div style="font-size: 0.9rem; color: #bbbbbb; margin-bottom: 10px;">东京都新宿区1-2-3</div>
+          <div style="display: flex; gap: 15px; margin-bottom: 10px;">
+            <div style="font-size: 0.9rem;">35㎡</div>
+            <div style="font-size: 0.9rem;">1LDK</div>
+            <div style="font-size: 0.9rem;">建于2018年</div>
+          </div>
+          <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e0e0e0; display: flex; flex-wrap: wrap; gap: 8px;">
+            <a href="#" style="font-size: 0.8rem; color: #1a1a1a; text-decoration: none; padding: 2px 6px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              SUUMO
+            </a>
+            <a href="#" style="font-size: 0.8rem; color: #1a1a1a; text-decoration: none; padding: 2px 6px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              at home
+            </a>
+            <a href="#" style="font-size: 0.8rem; color: #1a1a1a; text-decoration: none; padding: 2px 6px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              HOMES
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 房源卡片2 -->
+      <div class="property-card">
+        <div class="property-image">
+          <img src="https://picsum.photos/id/102/600/400" alt="房源图片">
+          <div style="position: absolute; top: 10px; right: 10px; background-color: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+            2个来源
+          </div>
+        </div>
+        <div class="property-content">
+          <div class="property-price">78.0万円</div>
+          <div style="font-size: 0.9rem; color: #bbbbbb; margin-bottom: 10px;">东京都渋谷区4-5-6</div>
+          <div style="display: flex; gap: 15px; margin-bottom: 10px;">
+            <div style="font-size: 0.9rem;">25㎡</div>
+            <div style="font-size: 0.9rem;">1K</div>
+            <div style="font-size: 0.9rem;">建于2015年</div>
+          </div>
+          <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e0e0e0; display: flex; flex-wrap: wrap; gap: 8px;">
+            <a href="#" style="font-size: 0.8rem; color: #1a1a1a; text-decoration: none; padding: 2px 6px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              SUUMO
+            </a>
+            <a href="#" style="font-size: 0.8rem; color: #1a1a1a; text-decoration: none; padding: 2px 6px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              LIFULL HOME'S
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 房源卡片3 -->
+      <div class="property-card">
+        <div class="property-image">
+          <img src="https://picsum.photos/id/103/600/400" alt="房源图片">
+          <div style="position: absolute; top: 10px; right: 10px; background-color: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+            4个来源
+          </div>
+        </div>
+        <div class="property-content">
+          <div class="property-price">156.8万円</div>
+          <div style="font-size: 0.9rem; color: #bbbbbb; margin-bottom: 10px;">东京都港区7-8-9</div>
+          <div style="display: flex; gap: 15px; margin-bottom: 10px;">
+            <div style="font-size: 0.9rem;">48㎡</div>
+            <div style="font-size: 0.9rem;">2LDK</div>
+            <div style="font-size: 0.9rem;">建于2020年</div>
+          </div>
+          <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e0e0e0; display: flex; flex-wrap: wrap; gap: 8px;">
+            <a href="#" style="font-size: 0.8rem; color: #1a1a1a; text-decoration: none; padding: 2px 6px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              HOMES
+            </a>
+            <a href="#" style="font-size: 0.8rem; color: #1a1a1a; text-decoration: none; padding: 2px 6px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              at home
+            </a>
+            <a href="#" style="font-size: 0.8rem; color: #1a1a1a; text-decoration: none; padding: 2px 6px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              カウカモ
+            </a>
+            <a href="#" style="font-size: 0.8rem; color: #1a1a1a; text-decoration: none; padding: 2px 6px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              Yahoo!不動産
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <footer style="background-color: #1a1a1a; color: white; padding: 20px 0; margin-top: 40px;">
+    <div class="container" style="text-align: center;">
+      <p>© 2023 日本房源搜索 - 极简风格的日本房产搜索引擎</p>
+    </div>
+  </footer>
+</body>
+</html> 

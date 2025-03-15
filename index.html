@@ -9,7 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA3PUO73p9_03jQEQC592HeJ72tDdNVsKc" defer></script>
+  <!-- 暂时注释掉Google Maps API，排除其影响 -->
+  <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA3PUO73p9_03jQEQC592HeJ72tDdNVsKc" defer></script> -->
   <style>
     .debug-box {
       padding: 20px;
@@ -32,16 +33,32 @@
     <h1>日本房源搜索 - 调试页面</h1>
     <p>如果您看到此内容，说明HTML已正确加载</p>
     <div id="js-test"></div>
+    
+    <!-- 测试CSS是否加载 -->
+    <div class="css-test">如果这个文字有绿色边框和背景，说明main.css加载成功</div>
   </div>
   
   <div id="root"></div>
   
-  <!-- 内联脚本测试 -->
+  <!-- 直接内联index.js的内容，而不是动态加载 -->
   <script>
-    document.getElementById('js-test').innerHTML = '<p>内联JavaScript正常工作</p>';
-    
     // 记录页面加载
     console.log('页面已加载', new Date().toISOString());
+    
+    // 内联JS测试
+    document.getElementById('js-test').innerHTML = '<p>内联JavaScript正常工作</p>';
+    
+    // index.js的内容直接内联
+    console.log("index.js内容已内联执行");
+    
+    // 尝试创建一个简单的元素
+    const rootElement = document.getElementById('root');
+    if(rootElement) {
+      rootElement.innerHTML = '<div style="background-color: lightblue; padding: 20px; color: black; margin: 20px; border: 2px solid blue;">这是由内联脚本渲染的内容</div>';
+    } else {
+      console.error("找不到root元素");
+      document.body.innerHTML += '<div style="color: red;">错误：找不到root元素</div>';
+    }
     
     // 捕获全局错误
     window.addEventListener('error', function(event) {
@@ -51,22 +68,6 @@
       errorDiv.textContent = '错误: ' + event.message;
       document.querySelector('.debug-box').appendChild(errorDiv);
     });
-    
-    // 尝试加载index.js
-    function loadScript() {
-      const script = document.createElement('script');
-      script.src = 'src/index.js';
-      script.onerror = function() {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error';
-        errorDiv.textContent = '无法加载index.js脚本';
-        document.querySelector('.debug-box').appendChild(errorDiv);
-      };
-      document.body.appendChild(script);
-    }
-    
-    // 延迟加载脚本
-    setTimeout(loadScript, 500);
   </script>
 </body>
 </html> 
