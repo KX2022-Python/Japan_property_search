@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="日本房源搜索 - 极简风格的日本房产搜索引擎">
-  <title>日本房源搜索</title>
+  <meta name="description" content="日本の物件検索 - シンプルなデザインの日本不動産検索エンジン">
+  <title>日本の物件検索</title>
   <link rel="stylesheet" href="styles/main.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -131,17 +131,91 @@
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 20px;
     }
+    
+    /* 语言切换样式 */
+    .language-toggle {
+      margin-left: 20px;
+      padding: 4px 8px;
+      background-color: #f5f5f5;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    
+    /* 地区选择下拉菜单样式 */
+    .location-dropdown {
+      position: relative;
+    }
+    
+    .location-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      background-color: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 10;
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
+    }
+    
+    .location-menu.active {
+      display: block;
+    }
+    
+    .prefecture-list, .line-list, .station-list {
+      padding: 10px;
+    }
+    
+    .prefecture-item, .line-item, .station-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    
+    .prefecture-item:hover, .line-item:hover, .station-item:hover {
+      background-color: #f5f5f5;
+    }
+    
+    .location-nav {
+      display: flex;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 8px;
+      background-color: #f9f9f9;
+    }
+    
+    .location-nav span {
+      font-size: 0.8rem;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+    
+    .location-nav span.active {
+      font-weight: bold;
+      color: #ff4d4d;
+    }
+    
+    .location-nav span:not(:last-child)::after {
+      content: ">";
+      margin: 0 4px;
+      color: #bbb;
+    }
   </style>
 </head>
 <body>
   <header>
     <div class="header-container container">
-      <div class="logo">日本房源搜索</div>
+      <div class="logo" data-ja="日本の物件検索" data-zh="日本房源搜索">日本の物件検索</div>
       <nav>
         <ul>
-          <li><a href="#">首页</a></li>
-          <li><a href="#">收藏</a></li>
-          <li><a href="#">关于</a></li>
+          <li><a href="#" data-ja="ホーム" data-zh="首页">ホーム</a></li>
+          <li><a href="#" data-ja="お気に入り" data-zh="收藏">お気に入り</a></li>
+          <li><a href="#" data-ja="について" data-zh="关于">について</a></li>
+          <li><button class="language-toggle" data-current="ja">中文</button></li>
         </ul>
       </nav>
     </div>
@@ -149,49 +223,181 @@
   
   <main class="container">
     <div class="view-toggle">
-      <button class="active">列表视图</button>
-      <button>地图视图</button>
+      <button class="active" data-ja="リスト表示" data-zh="列表视图">リスト表示</button>
+      <button data-ja="地図表示" data-zh="地图视图">地図表示</button>
     </div>
     
     <div class="filters">
-      <h3>筛选条件</h3>
+      <h3 data-ja="検索条件" data-zh="筛选条件">検索条件</h3>
       <form>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
-          <div>
-            <label for="location" style="display: block; margin-bottom: 5px;">地区</label>
-            <input type="text" id="location" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;" placeholder="输入地区、地址或车站">
+          <div class="location-dropdown">
+            <label for="location" style="display: block; margin-bottom: 5px;" data-ja="エリア" data-zh="地区">エリア</label>
+            <input type="text" id="location" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;" placeholder="都道府県、市区町村または駅" data-ja-placeholder="都道府県、市区町村または駅" data-zh-placeholder="输入地区、地址或车站" readonly>
+            
+            <!-- 地区选择下拉菜单 -->
+            <div class="location-menu" id="locationMenu">
+              <div class="location-nav">
+                <span class="location-nav-prefecture active" data-ja="都道府県" data-zh="都道府县">都道府県</span>
+                <span class="location-nav-line" data-ja="路線" data-zh="交通线路">路線</span>
+                <span class="location-nav-station" data-ja="駅" data-zh="车站">駅</span>
+              </div>
+              
+              <!-- 都道府县列表 -->
+              <div class="prefecture-list">
+                <div class="prefecture-item" data-value="東京都">東京都</div>
+                <div class="prefecture-item" data-value="神奈川県">神奈川県</div>
+                <div class="prefecture-item" data-value="埼玉県">埼玉県</div>
+                <div class="prefecture-item" data-value="千葉県">千葉県</div>
+                <div class="prefecture-item" data-value="大阪府">大阪府</div>
+                <div class="prefecture-item" data-value="京都府">京都府</div>
+                <div class="prefecture-item" data-value="兵庫県">兵庫県</div>
+                <div class="prefecture-item" data-value="北海道">北海道</div>
+                <div class="prefecture-item" data-value="福岡県">福岡県</div>
+              </div>
+              
+              <!-- 交通线路列表 -->
+              <div class="line-list" style="display: none;">
+                <!-- 东京的交通线路 -->
+                <div class="line-item tokyo-line" data-value="山手線">山手線</div>
+                <div class="line-item tokyo-line" data-value="中央線">中央線</div>
+                <div class="line-item tokyo-line" data-value="京浜東北線">京浜東北線</div>
+                <div class="line-item tokyo-line" data-value="東京メトロ銀座線">東京メトロ銀座線</div>
+                <div class="line-item tokyo-line" data-value="東京メトロ丸ノ内線">東京メトロ丸ノ内線</div>
+                
+                <!-- 大阪的交通线路 -->
+                <div class="line-item osaka-line" data-value="大阪環状線">大阪環状線</div>
+                <div class="line-item osaka-line" data-value="御堂筋線">御堂筋線</div>
+                <div class="line-item osaka-line" data-value="阪急京都線">阪急京都線</div>
+              </div>
+              
+              <!-- 车站列表 -->
+              <div class="station-list" style="display: none;">
+                <!-- 山手线的车站 -->
+                <div class="station-item yamanote-station" data-value="新宿">新宿駅</div>
+                <div class="station-item yamanote-station" data-value="渋谷">渋谷駅</div>
+                <div class="station-item yamanote-station" data-value="東京">東京駅</div>
+                <div class="station-item yamanote-station" data-value="池袋">池袋駅</div>
+                <div class="station-item yamanote-station" data-value="上野">上野駅</div>
+                
+                <!-- 中央线的车站 -->
+                <div class="station-item chuo-station" data-value="中野">中野駅</div>
+                <div class="station-item chuo-station" data-value="高円寺">高円寺駅</div>
+                <div class="station-item chuo-station" data-value="阿佐ヶ谷">阿佐ヶ谷駅</div>
+                <div class="station-item chuo-station" data-value="荻窪">荻窪駅</div>
+                
+                <!-- 其他线路的车站可以根据需要添加 -->
+              </div>
+            </div>
           </div>
           
+          <!-- 价格选择 - 最低价格 (改为下拉选择，单位为万日币) -->
           <div>
-            <label for="priceMin" style="display: block; margin-bottom: 5px;">最低价格 (¥)</label>
-            <input type="number" id="priceMin" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;" placeholder="最低价格">
+            <label for="priceMin" style="display: block; margin-bottom: 5px;" data-ja="最低価格 (万円)" data-zh="最低价格 (万日币)">最低価格 (万円)</label>
+            <select id="priceMin" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              <option value="" data-ja="指定なし" data-zh="不限">指定なし</option>
+              <option value="1000">1,000</option>
+              <option value="2000">2,000</option>
+              <option value="3000">3,000</option>
+              <option value="4000">4,000</option>
+              <option value="5000">5,000</option>
+              <option value="6000">6,000</option>
+              <option value="7000">7,000</option>
+              <option value="8000">8,000</option>
+              <option value="9000">9,000</option>
+              <option value="10000">10,000</option>
+              <option value="12000">12,000</option>
+              <option value="15000">15,000</option>
+              <option value="20000">20,000</option>
+              <option value="25000">25,000</option>
+              <option value="30000">30,000</option>
+            </select>
           </div>
           
+          <!-- 价格选择 - 最高价格 (改为下拉选择，单位为万日币) -->
           <div>
-            <label for="priceMax" style="display: block; margin-bottom: 5px;">最高价格 (¥)</label>
-            <input type="number" id="priceMax" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;" placeholder="最高价格">
+            <label for="priceMax" style="display: block; margin-bottom: 5px;" data-ja="最高価格 (万円)" data-zh="最高价格 (万日币)">最高価格 (万円)</label>
+            <select id="priceMax" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              <option value="" data-ja="指定なし" data-zh="不限">指定なし</option>
+              <option value="1000">1,000</option>
+              <option value="2000">2,000</option>
+              <option value="3000">3,000</option>
+              <option value="4000">4,000</option>
+              <option value="5000">5,000</option>
+              <option value="6000">6,000</option>
+              <option value="7000">7,000</option>
+              <option value="8000">8,000</option>
+              <option value="9000">9,000</option>
+              <option value="10000">10,000</option>
+              <option value="12000">12,000</option>
+              <option value="15000">15,000</option>
+              <option value="20000">20,000</option>
+              <option value="25000">25,000</option>
+              <option value="30000">30,000</option>
+            </select>
           </div>
           
+          <!-- 面积选择 - 最小面积 -->
           <div>
-            <label for="rooms" style="display: block; margin-bottom: 5px;">房间数</label>
+            <label for="areaMin" style="display: block; margin-bottom: 5px;" data-ja="最小面積 (㎡)" data-zh="最小面积 (㎡)">最小面積 (㎡)</label>
+            <select id="areaMin" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              <option value="" data-ja="指定なし" data-zh="不限">指定なし</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+              <option value="60">60</option>
+              <option value="70">70</option>
+              <option value="80">80</option>
+              <option value="90">90</option>
+              <option value="100">100</option>
+              <option value="120">120</option>
+              <option value="140">140</option>
+              <option value="160">160</option>
+              <option value="180">180</option>
+              <option value="200">200</option>
+            </select>
+          </div>
+          
+          <!-- 面积选择 - 最大面积 -->
+          <div>
+            <label for="areaMax" style="display: block; margin-bottom: 5px;" data-ja="最大面積 (㎡)" data-zh="最大面积 (㎡)">最大面積 (㎡)</label>
+            <select id="areaMax" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              <option value="" data-ja="指定なし" data-zh="不限">指定なし</option>
+              <option value="40">40</option>
+              <option value="50">50</option>
+              <option value="60">60</option>
+              <option value="70">70</option>
+              <option value="80">80</option>
+              <option value="90">90</option>
+              <option value="100">100</option>
+              <option value="120">120</option>
+              <option value="140">140</option>
+              <option value="160">160</option>
+              <option value="180">180</option>
+              <option value="200">200</option>
+            </select>
+          </div>
+          
+          <!-- 房型选择 -->
+          <div>
+            <label for="rooms" style="display: block; margin-bottom: 5px;" data-ja="間取り" data-zh="房间数">間取り</label>
             <select id="rooms" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
-              <option value="">不限</option>
-              <option value="1">1R/1K</option>
-              <option value="1.5">1DK/1LDK</option>
-              <option value="2">2K/2DK</option>
-              <option value="2.5">2LDK</option>
-              <option value="3">3K/3DK/3LDK</option>
-              <option value="4">4K以上</option>
+              <option value="" data-ja="指定なし" data-zh="不限">指定なし</option>
+              <option value="1" data-ja="1R/1K" data-zh="1R/1K">1R/1K</option>
+              <option value="1.5" data-ja="1DK/1LDK" data-zh="1DK/1LDK">1DK/1LDK</option>
+              <option value="2" data-ja="2K/2DK" data-zh="2K/2DK">2K/2DK</option>
+              <option value="2.5" data-ja="2LDK" data-zh="2LDK">2LDK</option>
+              <option value="3" data-ja="3K/3DK/3LDK" data-zh="3K/3DK/3LDK">3K/3DK/3LDK</option>
+              <option value="4" data-ja="4K以上" data-zh="4K以上">4K以上</option>
             </select>
           </div>
         </div>
         
         <div style="display: flex; justify-content: flex-end; margin-top: 15px;">
-          <button type="button" style="background-color: transparent; border: 1px solid #e0e0e0; padding: 8px 16px; border-radius: 4px; margin-right: 10px; cursor: pointer;">
-            重置筛选
+          <button type="button" style="background-color: transparent; border: 1px solid #e0e0e0; padding: 8px 16px; border-radius: 4px; margin-right: 10px; cursor: pointer;" data-ja="条件をリセット" data-zh="重置筛选">
+            条件をリセット
           </button>
-          <button type="submit" style="background-color: #ff4d4d; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
-            应用筛选
+          <button type="submit" style="background-color: #ff4d4d; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;" data-ja="検索する" data-zh="应用筛选">
+            検索する
           </button>
         </div>
       </form>
@@ -201,18 +407,18 @@
       <!-- 房源卡片1 -->
       <div class="property-card">
         <div class="property-image">
-          <img src="https://picsum.photos/id/101/600/400" alt="房源图片">
-          <div style="position: absolute; top: 10px; right: 10px; background-color: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
-            3个来源
+          <img src="https://picsum.photos/id/101/600/400" alt="物件画像">
+          <div style="position: absolute; top: 10px; right: 10px; background-color: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;" data-ja="3つの情報源" data-zh="3个来源">
+            3つの情報源
           </div>
         </div>
         <div class="property-content">
           <div class="property-price">125.5万円</div>
-          <div style="font-size: 0.9rem; color: #bbbbbb; margin-bottom: 10px;">东京都新宿区1-2-3</div>
+          <div style="font-size: 0.9rem; color: #bbbbbb; margin-bottom: 10px;">東京都新宿区1-2-3</div>
           <div style="display: flex; gap: 15px; margin-bottom: 10px;">
             <div style="font-size: 0.9rem;">35㎡</div>
             <div style="font-size: 0.9rem;">1LDK</div>
-            <div style="font-size: 0.9rem;">建于2018年</div>
+            <div style="font-size: 0.9rem;" data-ja="築2018年" data-zh="建于2018年">築2018年</div>
           </div>
           <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e0e0e0; display: flex; flex-wrap: wrap; gap: 8px;">
             <a href="#" style="font-size: 0.8rem; color: #1a1a1a; text-decoration: none; padding: 2px 6px; border: 1px solid #e0e0e0; border-radius: 4px;">
@@ -231,18 +437,18 @@
       <!-- 房源卡片2 -->
       <div class="property-card">
         <div class="property-image">
-          <img src="https://picsum.photos/id/102/600/400" alt="房源图片">
-          <div style="position: absolute; top: 10px; right: 10px; background-color: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
-            2个来源
+          <img src="https://picsum.photos/id/102/600/400" alt="物件画像">
+          <div style="position: absolute; top: 10px; right: 10px; background-color: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;" data-ja="2つの情報源" data-zh="2个来源">
+            2つの情報源
           </div>
         </div>
         <div class="property-content">
           <div class="property-price">78.0万円</div>
-          <div style="font-size: 0.9rem; color: #bbbbbb; margin-bottom: 10px;">东京都渋谷区4-5-6</div>
+          <div style="font-size: 0.9rem; color: #bbbbbb; margin-bottom: 10px;">東京都渋谷区4-5-6</div>
           <div style="display: flex; gap: 15px; margin-bottom: 10px;">
             <div style="font-size: 0.9rem;">25㎡</div>
             <div style="font-size: 0.9rem;">1K</div>
-            <div style="font-size: 0.9rem;">建于2015年</div>
+            <div style="font-size: 0.9rem;" data-ja="築2015年" data-zh="建于2015年">築2015年</div>
           </div>
           <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e0e0e0; display: flex; flex-wrap: wrap; gap: 8px;">
             <a href="#" style="font-size: 0.8rem; color: #1a1a1a; text-decoration: none; padding: 2px 6px; border: 1px solid #e0e0e0; border-radius: 4px;">
@@ -258,18 +464,18 @@
       <!-- 房源卡片3 -->
       <div class="property-card">
         <div class="property-image">
-          <img src="https://picsum.photos/id/103/600/400" alt="房源图片">
-          <div style="position: absolute; top: 10px; right: 10px; background-color: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
-            4个来源
+          <img src="https://picsum.photos/id/103/600/400" alt="物件画像">
+          <div style="position: absolute; top: 10px; right: 10px; background-color: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;" data-ja="4つの情報源" data-zh="4个来源">
+            4つの情報源
           </div>
         </div>
         <div class="property-content">
           <div class="property-price">156.8万円</div>
-          <div style="font-size: 0.9rem; color: #bbbbbb; margin-bottom: 10px;">东京都港区7-8-9</div>
+          <div style="font-size: 0.9rem; color: #bbbbbb; margin-bottom: 10px;">東京都港区7-8-9</div>
           <div style="display: flex; gap: 15px; margin-bottom: 10px;">
             <div style="font-size: 0.9rem;">48㎡</div>
             <div style="font-size: 0.9rem;">2LDK</div>
-            <div style="font-size: 0.9rem;">建于2020年</div>
+            <div style="font-size: 0.9rem;" data-ja="築2020年" data-zh="建于2020年">築2020年</div>
           </div>
           <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e0e0e0; display: flex; flex-wrap: wrap; gap: 8px;">
             <a href="#" style="font-size: 0.8rem; color: #1a1a1a; text-decoration: none; padding: 2px 6px; border: 1px solid #e0e0e0; border-radius: 4px;">
@@ -292,28 +498,182 @@
   
   <footer style="background-color: #1a1a1a; color: white; padding: 20px 0; margin-top: 40px;">
     <div class="container" style="text-align: center;">
-      <p>© 2023 日本房源搜索 - 极简风格的日本房产搜索引擎</p>
+      <p data-ja="© 2023 日本の物件検索 - シンプルなデザインの日本不動産検索エンジン" data-zh="© 2023 日本房源搜索 - 极简风格的日本房产搜索引擎">© 2023 日本の物件検索 - シンプルなデザインの日本不動産検索エンジン</p>
     </div>
   </footer>
   
-  <!-- 添加简单的视图切换功能 -->
+  <!-- 添加交互功能的脚本 -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // 获取视图切换按钮
+      // 语言切换功能
+      const languageToggle = document.querySelector('.language-toggle');
+      let currentLang = 'ja'; // 默认语言为日语
+      
+      languageToggle.addEventListener('click', function() {
+        // 切换语言
+        currentLang = currentLang === 'ja' ? 'zh' : 'ja';
+        this.setAttribute('data-current', currentLang);
+        
+        // 更新按钮文本
+        this.textContent = currentLang === 'ja' ? '中文' : '日本語';
+        
+        // 更新所有带有data-ja和data-zh属性的元素
+        const elements = document.querySelectorAll('[data-ja][data-zh]');
+        elements.forEach(el => {
+          el.textContent = el.getAttribute(`data-${currentLang}`);
+        });
+        
+        // 更新所有输入框的placeholder
+        const inputs = document.querySelectorAll('input[data-ja-placeholder][data-zh-placeholder]');
+        inputs.forEach(input => {
+          input.placeholder = input.getAttribute(`data-${currentLang}-placeholder`);
+        });
+        
+        // 更新所有选项的文本
+        const options = document.querySelectorAll('option[data-ja][data-zh]');
+        options.forEach(option => {
+          option.textContent = option.getAttribute(`data-${currentLang}`);
+        });
+      });
+      
+      // 地区选择功能
+      const locationInput = document.getElementById('location');
+      const locationMenu = document.getElementById('locationMenu');
+      
+      // 点击输入框时显示地区选择菜单
+      locationInput.addEventListener('click', function(e) {
+        e.stopPropagation();
+        locationMenu.classList.toggle('active');
+      });
+      
+      // 点击页面其他部分关闭地区选择菜单
+      document.addEventListener('click', function(e) {
+        if (!locationMenu.contains(e.target) && e.target !== locationInput) {
+          locationMenu.classList.remove('active');
+        }
+      });
+      
+      // 导航菜单切换
+      const prefectureNav = document.querySelector('.location-nav-prefecture');
+      const lineNav = document.querySelector('.location-nav-line');
+      const stationNav = document.querySelector('.location-nav-station');
+      
+      const prefectureList = document.querySelector('.prefecture-list');
+      const lineList = document.querySelector('.line-list');
+      const stationList = document.querySelector('.station-list');
+      
+      prefectureNav.addEventListener('click', function() {
+        prefectureNav.classList.add('active');
+        lineNav.classList.remove('active');
+        stationNav.classList.remove('active');
+        
+        prefectureList.style.display = 'block';
+        lineList.style.display = 'none';
+        stationList.style.display = 'none';
+      });
+      
+      lineNav.addEventListener('click', function() {
+        prefectureNav.classList.remove('active');
+        lineNav.classList.add('active');
+        stationNav.classList.remove('active');
+        
+        prefectureList.style.display = 'none';
+        lineList.style.display = 'block';
+        stationList.style.display = 'none';
+      });
+      
+      stationNav.addEventListener('click', function() {
+        prefectureNav.classList.remove('active');
+        lineNav.classList.remove('active');
+        stationNav.classList.add('active');
+        
+        prefectureList.style.display = 'none';
+        lineList.style.display = 'none';
+        stationList.style.display = 'block';
+      });
+      
+      // 选择都道府县
+      const prefectureItems = document.querySelectorAll('.prefecture-item');
+      let selectedPrefecture = '';
+      
+      prefectureItems.forEach(item => {
+        item.addEventListener('click', function() {
+          selectedPrefecture = this.getAttribute('data-value');
+          locationInput.value = selectedPrefecture;
+          
+          // 根据选择的都道府县显示相应的交通线路
+          showLinesForPrefecture(selectedPrefecture);
+          
+          // 自动切换到线路选择
+          lineNav.click();
+        });
+      });
+      
+      // 根据选择的都道府县显示相应的交通线路
+      function showLinesForPrefecture(prefecture) {
+        const allLines = document.querySelectorAll('.line-item');
+        allLines.forEach(line => line.style.display = 'none');
+        
+        if (prefecture === '東京都') {
+          document.querySelectorAll('.tokyo-line').forEach(line => line.style.display = 'block');
+        } else if (prefecture === '大阪府') {
+          document.querySelectorAll('.osaka-line').forEach(line => line.style.display = 'block');
+        }
+        // 可以添加更多都道府县的处理...
+      }
+      
+      // 选择交通线路
+      const lineItems = document.querySelectorAll('.line-item');
+      let selectedLine = '';
+      
+      lineItems.forEach(item => {
+        item.addEventListener('click', function() {
+          selectedLine = this.getAttribute('data-value');
+          locationInput.value = `${selectedPrefecture} ${selectedLine}`;
+          
+          // 根据选择的线路显示相应的车站
+          showStationsForLine(selectedLine);
+          
+          // 自动切换到车站选择
+          stationNav.click();
+        });
+      });
+      
+      // 根据选择的线路显示相应的车站
+      function showStationsForLine(line) {
+        const allStations = document.querySelectorAll('.station-item');
+        allStations.forEach(station => station.style.display = 'none');
+        
+        if (line === '山手線') {
+          document.querySelectorAll('.yamanote-station').forEach(station => station.style.display = 'block');
+        } else if (line === '中央線') {
+          document.querySelectorAll('.chuo-station').forEach(station => station.style.display = 'block');
+        }
+        // 可以添加更多线路的处理...
+      }
+      
+      // 选择车站
+      const stationItems = document.querySelectorAll('.station-item');
+      
+      stationItems.forEach(item => {
+        item.addEventListener('click', function() {
+          const station = this.getAttribute('data-value');
+          locationInput.value = `${selectedPrefecture} ${selectedLine} ${station}`;
+          locationMenu.classList.remove('active');
+        });
+      });
+      
+      // 视图切换功能
       const viewButtons = document.querySelectorAll('.view-toggle button');
       
-      // 点击事件处理
       viewButtons.forEach(button => {
         button.addEventListener('click', function() {
-          // 首先移除所有按钮的active类
           viewButtons.forEach(btn => btn.classList.remove('active'));
-          
-          // 为当前点击的按钮添加active类
           this.classList.add('active');
           
-          // 提示用户地图视图功能正在开发中
-          if(this.textContent.trim() === '地图视图') {
-            alert('地图视图功能正在开发中，敬请期待！');
+          if(this.textContent.includes('地図') || this.textContent.includes('地图')) {
+            const alertText = currentLang === 'ja' ? '地図表示機能は開発中です。お待ちください！' : '地图视图功能正在开发中，敬请期待！';
+            alert(alertText);
           }
         });
       });
@@ -338,10 +698,19 @@
           const location = document.getElementById('location').value;
           const priceMin = document.getElementById('priceMin').value;
           const priceMax = document.getElementById('priceMax').value;
+          const areaMin = document.getElementById('areaMin').value;
+          const areaMax = document.getElementById('areaMax').value;
           const rooms = document.getElementById('rooms').value;
           
-          // 显示筛选条件
-          alert(`已应用筛选条件:\n地区: ${location || '不限'}\n价格: ${priceMin || '0'} - ${priceMax || '不限'}\n房型: ${rooms || '不限'}`);
+          // 根据当前语言显示不同的提示
+          let alertMessage = '';
+          if (currentLang === 'ja') {
+            alertMessage = `検索条件を適用しました。\n地区: ${location || '不限'}\n価格: ${priceMin || '0'} - ${priceMax || '不限'}\n面積: ${areaMin || '0'} - ${areaMax || '不限'}\n間取り: ${rooms || '不限'}`;
+          } else {
+            alertMessage = `已应用筛选条件:\n地区: ${location || '不限'}\n价格: ${priceMin || '0'} - ${priceMax || '不限'}\n面积: ${areaMin || '0'} - ${areaMax || '不限'}\n房间数: ${rooms || '不限'}`;
+          }
+          
+          alert(alertMessage);
         });
       }
     });
