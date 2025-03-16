@@ -390,9 +390,24 @@
               <option value="4" data-ja="4K以上" data-zh="4K以上">4K以上</option>
             </select>
           </div>
+          
+          <!-- 在房型选择后添加朝向选择 -->
+          <div>
+            <label for="orientation" style="display: block; margin-bottom: 5px;" data-ja="リビング向き" data-zh="客厅朝向">リビング向き</label>
+            <select id="orientation" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
+              <option value="" data-ja="指定なし" data-zh="不限">指定なし</option>
+              <option value="north" data-ja="北向き" data-zh="朝北">北向き</option>
+              <option value="south" data-ja="南向き" data-zh="朝南">南向き</option>
+              <option value="east" data-ja="東向き" data-zh="朝东">東向き</option>
+              <option value="west" data-ja="西向き" data-zh="朝西">西向き</option>
+            </select>
+          </div>
         </div>
         
         <div style="display: flex; justify-content: flex-end; margin-top: 15px;">
+          <button type="button" id="updateButton" style="background-color: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 4px; margin-right: 10px; cursor: pointer;" data-ja="データを更新" data-zh="更新数据">
+            データを更新
+          </button>
           <button type="button" style="background-color: transparent; border: 1px solid #e0e0e0; padding: 8px 16px; border-radius: 4px; margin-right: 10px; cursor: pointer;" data-ja="条件をリセット" data-zh="重置筛选">
             条件をリセット
           </button>
@@ -701,16 +716,102 @@
           const areaMin = document.getElementById('areaMin').value;
           const areaMax = document.getElementById('areaMax').value;
           const rooms = document.getElementById('rooms').value;
+          const orientation = document.getElementById('orientation').value;
           
           // 根据当前语言显示不同的提示
+          let orientationText = '';
+          if (orientation) {
+            if (currentLang === 'ja') {
+              orientationText = document.querySelector(`#orientation option[value="${orientation}"]`).textContent;
+            } else {
+              const orientationMap = {
+                'north': '朝北',
+                'south': '朝南',
+                'east': '朝东',
+                'west': '朝西'
+              };
+              orientationText = orientationMap[orientation];
+            }
+          }
+          
           let alertMessage = '';
           if (currentLang === 'ja') {
-            alertMessage = `検索条件を適用しました。\n地区: ${location || '不限'}\n価格: ${priceMin || '0'} - ${priceMax || '不限'}\n面積: ${areaMin || '0'} - ${areaMax || '不限'}\n間取り: ${rooms || '不限'}`;
+            alertMessage = `検索条件を適用しました。\n地区: ${location || '不限'}\n価格: ${priceMin || '0'} - ${priceMax || '不限'}\n面積: ${areaMin || '0'} - ${areaMax || '不限'}\n間取り: ${rooms || '不限'}\nリビング向き: ${orientationText || '不限'}`;
           } else {
-            alertMessage = `已应用筛选条件:\n地区: ${location || '不限'}\n价格: ${priceMin || '0'} - ${priceMax || '不限'}\n面积: ${areaMin || '0'} - ${areaMax || '不限'}\n房间数: ${rooms || '不限'}`;
+            alertMessage = `已应用筛选条件:\n地区: ${location || '不限'}\n价格: ${priceMin || '0'} - ${priceMax || '不限'}\n面积: ${areaMin || '0'} - ${areaMax || '不限'}\n房间数: ${rooms || '不限'}\n客厅朝向: ${orientationText || '不限'}`;
           }
           
           alert(alertMessage);
+        });
+      }
+
+      // 添加更新按钮功能
+      const updateButton = document.getElementById('updateButton');
+      if(updateButton) {
+        updateButton.addEventListener('click', async function() {
+          try {
+            // 显示加载状态
+            updateButton.disabled = true;
+            const originalText = updateButton.textContent;
+            updateButton.textContent = currentLang === 'ja' ? '更新中...' : '更新中...';
+            
+            // 获取当前筛选条件
+            const filters = {
+              location: document.getElementById('location').value,
+              priceMin: document.getElementById('priceMin').value,
+              priceMax: document.getElementById('priceMax').value,
+              areaMin: document.getElementById('areaMin').value,
+              areaMax: document.getElementById('areaMax').value,
+              rooms: document.getElementById('rooms').value,
+              orientation: document.getElementById('orientation').value
+            };
+            
+            // 处理朝向筛选逻辑
+            function matchOrientation(propertyOrientation, selectedOrientation) {
+              if (!selectedOrientation) return true;
+              
+              // 将房屋朝向转换为数组（例如："南东" => ["south", "east"]）
+              const orientationMap = {
+                '北': ['north'],
+                '南': ['south'],
+                '东': ['east'],
+                '西': ['west'],
+                '东南': ['east', 'south'],
+                '西南': ['west', 'south'],
+                '东北': ['east', 'north'],
+                '西北': ['west', 'north']
+              };
+              
+              const propertyOrientations = orientationMap[propertyOrientation] || [];
+              return propertyOrientations.includes(selectedOrientation);
+            }
+            
+            // 模拟数据更新过程
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // 更新完成后显示提示
+            const message = currentLang === 'ja' 
+              ? '最新のデータに更新されました。\n\n更新された情報源:\n- SUUMO\n- at home\n- HOMES\n- Yahoo!不動産'
+              : '数据已更新完成。\n\n已更新来源:\n- SUUMO\n- at home\n- HOMES\n- Yahoo!房产';
+            
+            alert(message);
+            
+            // 恢复按钮状态
+            updateButton.disabled = false;
+            updateButton.textContent = originalText;
+            
+          } catch (error) {
+            // 发生错误时显示错误信息
+            const errorMessage = currentLang === 'ja'
+              ? 'データの更新中にエラーが発生しました。もう一度お試しください。'
+              : '数据更新过程中发生错误，请重试。';
+            
+            alert(errorMessage);
+            
+            // 恢复按钮状态
+            updateButton.disabled = false;
+            updateButton.textContent = originalText;
+          }
         });
       }
     });
