@@ -204,6 +204,64 @@
       margin: 0 4px;
       color: #bbb;
     }
+
+    .new-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: #ff4d4d;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      animation: fadeInOut 0.5s ease-in-out;
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(-10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .location-group-title {
+      font-weight: bold;
+      padding: 8px 12px;
+      background-color: #f5f5f5;
+      margin-top: 10px;
+    }
+
+    .location-checkbox {
+      margin-right: 8px;
+    }
+
+    .selected-item {
+      background-color: #e0e0e0;
+      padding: 2px 8px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .selected-item .remove-item {
+      cursor: pointer;
+      color: #666;
+      font-size: 12px;
+    }
+
+    .selected-item .remove-item:hover {
+      color: #ff4d4d;
+    }
+
+    .line-group, .station-group {
+      margin-bottom: 15px;
+    }
+
+    .line-group-title, .station-group-title {
+      font-weight: bold;
+      padding: 8px 12px;
+      background-color: #f5f5f5;
+    }
   </style>
 </head>
 <body>
@@ -221,6 +279,11 @@
     </div>
   </header>
   
+  <!-- 在body标签内，main标签前添加提示消息容器 -->
+  <div id="updateMessage" style="display: none; position: fixed; top: 20px; right: 20px; background-color: rgba(0, 0, 0, 0.8); color: white; padding: 10px 20px; border-radius: 4px; z-index: 1000;" data-ja="現在のデータは最新です" data-zh="目前已是最新数据">
+    現在のデータは最新です
+  </div>
+  
   <main class="container">
     <div class="view-toggle">
       <button class="active" data-ja="リスト表示" data-zh="列表视图">リスト表示</button>
@@ -232,66 +295,111 @@
       <form>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
           <div class="location-dropdown">
-            <label for="location" style="display: block; margin-bottom: 5px;" data-ja="エリア" data-zh="地区">エリア</label>
-            <input type="text" id="location" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;" placeholder="都道府県、市区町村または駅" data-ja-placeholder="都道府県、市区町村または駅" data-zh-placeholder="输入地区、地址或车站" readonly>
+            <label for="location" style="display: block; margin-bottom: 5px;" data-ja="エリア（複数選択可）" data-zh="地区（可多选）">エリア（複数選択可）</label>
+            <div id="location" style="width: 100%; min-height: 38px; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px; cursor: pointer; background-color: white;" data-ja-placeholder="都県、路線または駅を選択" data-zh-placeholder="选择都县、线路或车站">
+              <div class="selected-items" style="display: flex; flex-wrap: wrap; gap: 5px;"></div>
+            </div>
             
-            <!-- 地区选择下拉菜单 -->
             <div class="location-menu" id="locationMenu">
               <div class="location-nav">
-                <span class="location-nav-prefecture active" data-ja="都道府県" data-zh="都道府县">都道府県</span>
-                <span class="location-nav-line" data-ja="路線" data-zh="交通线路">路線</span>
+                <span class="location-nav-prefecture active" data-ja="都県" data-zh="都县">都県</span>
+                <span class="location-nav-line" data-ja="路線" data-zh="线路">路線</span>
                 <span class="location-nav-station" data-ja="駅" data-zh="车站">駅</span>
               </div>
               
-              <!-- 都道府县列表 -->
               <div class="prefecture-list">
-                <div class="prefecture-item" data-value="東京都">東京都</div>
-                <div class="prefecture-item" data-value="神奈川県">神奈川県</div>
-                <div class="prefecture-item" data-value="埼玉県">埼玉県</div>
-                <div class="prefecture-item" data-value="千葉県">千葉県</div>
-                <div class="prefecture-item" data-value="大阪府">大阪府</div>
-                <div class="prefecture-item" data-value="京都府">京都府</div>
-                <div class="prefecture-item" data-value="兵庫県">兵庫県</div>
-                <div class="prefecture-item" data-value="北海道">北海道</div>
-                <div class="prefecture-item" data-value="福岡県">福岡県</div>
+                <div class="prefecture-item" data-value="東京都">
+                  <input type="checkbox" id="tokyo" class="location-checkbox">
+                  <label for="tokyo">東京都</label>
+                </div>
+                <div class="prefecture-item" data-value="神奈川県">
+                  <input type="checkbox" id="kanagawa" class="location-checkbox">
+                  <label for="kanagawa">神奈川県</label>
+                </div>
+                <div class="prefecture-item" data-value="埼玉県">
+                  <input type="checkbox" id="saitama" class="location-checkbox">
+                  <label for="saitama">埼玉県</label>
+                </div>
+                <div class="prefecture-item" data-value="千葉県">
+                  <input type="checkbox" id="chiba" class="location-checkbox">
+                  <label for="chiba">千葉県</label>
+                </div>
               </div>
               
-              <!-- 交通线路列表 -->
               <div class="line-list" style="display: none;">
-                <!-- 东京的交通线路 -->
-                <div class="line-item tokyo-line" data-value="山手線">山手線</div>
-                <div class="line-item tokyo-line" data-value="中央線">中央線</div>
-                <div class="line-item tokyo-line" data-value="京浜東北線">京浜東北線</div>
-                <div class="line-item tokyo-line" data-value="東京メトロ銀座線">東京メトロ銀座線</div>
-                <div class="line-item tokyo-line" data-value="東京メトロ丸ノ内線">東京メトロ丸ノ内線</div>
+                <div class="line-group">
+                  <div class="line-group-title">JR線</div>
+                  <div class="line-item" data-value="山手線">
+                    <input type="checkbox" id="yamanote" class="location-checkbox">
+                    <label for="yamanote">山手線</label>
+                  </div>
+                  <div class="line-item" data-value="中央線">
+                    <input type="checkbox" id="chuo" class="location-checkbox">
+                    <label for="chuo">中央線</label>
+                  </div>
+                  <div class="line-item" data-value="総武線">
+                    <input type="checkbox" id="sobu" class="location-checkbox">
+                    <label for="sobu">総武線</label>
+                  </div>
+                  <div class="line-item" data-value="埼京線">
+                    <input type="checkbox" id="saikyo" class="location-checkbox">
+                    <label for="saikyo">埼京線</label>
+                  </div>
+                </div>
                 
-                <!-- 大阪的交通线路 -->
-                <div class="line-item osaka-line" data-value="大阪環状線">大阪環状線</div>
-                <div class="line-item osaka-line" data-value="御堂筋線">御堂筋線</div>
-                <div class="line-item osaka-line" data-value="阪急京都線">阪急京都線</div>
+                <div class="line-group">
+                  <div class="line-group-title">東京メトロ</div>
+                  <div class="line-item" data-value="銀座線">
+                    <input type="checkbox" id="ginza" class="location-checkbox">
+                    <label for="ginza">銀座線</label>
+                  </div>
+                  <div class="line-item" data-value="丸ノ内線">
+                    <input type="checkbox" id="marunouchi" class="location-checkbox">
+                    <label for="marunouchi">丸ノ内線</label>
+                  </div>
+                  <div class="line-item" data-value="日比谷線">
+                    <input type="checkbox" id="hibiya" class="location-checkbox">
+                    <label for="hibiya">日比谷線</label>
+                  </div>
+                </div>
               </div>
               
-              <!-- 车站列表 -->
               <div class="station-list" style="display: none;">
-                <!-- 山手线的车站 -->
-                <div class="station-item yamanote-station" data-value="新宿">新宿駅</div>
-                <div class="station-item yamanote-station" data-value="渋谷">渋谷駅</div>
-                <div class="station-item yamanote-station" data-value="東京">東京駅</div>
-                <div class="station-item yamanote-station" data-value="池袋">池袋駅</div>
-                <div class="station-item yamanote-station" data-value="上野">上野駅</div>
+                <div class="station-group yamanote-stations">
+                  <div class="station-group-title">山手線</div>
+                  <div class="station-item" data-value="新宿">
+                    <input type="checkbox" id="shinjuku" class="location-checkbox">
+                    <label for="shinjuku">新宿駅</label>
+                  </div>
+                  <div class="station-item" data-value="渋谷">
+                    <input type="checkbox" id="shibuya" class="location-checkbox">
+                    <label for="shibuya">渋谷駅</label>
+                  </div>
+                  <div class="station-item" data-value="池袋">
+                    <input type="checkbox" id="ikebukuro" class="location-checkbox">
+                    <label for="ikebukuro">池袋駅</label>
+                  </div>
+                </div>
                 
-                <!-- 中央线的车站 -->
-                <div class="station-item chuo-station" data-value="中野">中野駅</div>
-                <div class="station-item chuo-station" data-value="高円寺">高円寺駅</div>
-                <div class="station-item chuo-station" data-value="阿佐ヶ谷">阿佐ヶ谷駅</div>
-                <div class="station-item chuo-station" data-value="荻窪">荻窪駅</div>
-                
-                <!-- 其他线路的车站可以根据需要添加 -->
+                <div class="station-group chuo-stations">
+                  <div class="station-group-title">中央線</div>
+                  <div class="station-item" data-value="中野">
+                    <input type="checkbox" id="nakano" class="location-checkbox">
+                    <label for="nakano">中野駅</label>
+                  </div>
+                  <div class="station-item" data-value="高円寺">
+                    <input type="checkbox" id="koenji" class="location-checkbox">
+                    <label for="koenji">高円寺駅</label>
+                  </div>
+                  <div class="station-item" data-value="阿佐ヶ谷">
+                    <input type="checkbox" id="asagaya" class="location-checkbox">
+                    <label for="asagaya">阿佐ヶ谷駅</label>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
           
-          <!-- 价格选择 - 最低价格 (改为下拉选择，单位为万日币) -->
           <div>
             <label for="priceMin" style="display: block; margin-bottom: 5px;" data-ja="最低価格 (万円)" data-zh="最低价格 (万日币)">最低価格 (万円)</label>
             <select id="priceMin" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
@@ -314,7 +422,6 @@
             </select>
           </div>
           
-          <!-- 价格选择 - 最高价格 (改为下拉选择，单位为万日币) -->
           <div>
             <label for="priceMax" style="display: block; margin-bottom: 5px;" data-ja="最高価格 (万円)" data-zh="最高价格 (万日币)">最高価格 (万円)</label>
             <select id="priceMax" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
@@ -337,7 +444,6 @@
             </select>
           </div>
           
-          <!-- 面积选择 - 最小面积 -->
           <div>
             <label for="areaMin" style="display: block; margin-bottom: 5px;" data-ja="最小面積 (㎡)" data-zh="最小面积 (㎡)">最小面積 (㎡)</label>
             <select id="areaMin" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
@@ -357,7 +463,6 @@
             </select>
           </div>
           
-          <!-- 面积选择 - 最大面积 -->
           <div>
             <label for="areaMax" style="display: block; margin-bottom: 5px;" data-ja="最大面積 (㎡)" data-zh="最大面积 (㎡)">最大面積 (㎡)</label>
             <select id="areaMax" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
@@ -377,7 +482,6 @@
             </select>
           </div>
           
-          <!-- 房型选择 -->
           <div>
             <label for="rooms" style="display: block; margin-bottom: 5px;" data-ja="間取り" data-zh="房间数">間取り</label>
             <select id="rooms" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
@@ -391,7 +495,6 @@
             </select>
           </div>
           
-          <!-- 在房型选择后添加朝向选择 -->
           <div>
             <label for="orientation" style="display: block; margin-bottom: 5px;" data-ja="リビング向き" data-zh="客厅朝向">リビング向き</label>
             <select id="orientation" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
@@ -419,7 +522,6 @@
     </div>
     
     <div class="list-view">
-      <!-- 房源卡片1 -->
       <div class="property-card">
         <div class="property-image">
           <img src="https://picsum.photos/id/101/600/400" alt="物件画像">
@@ -449,7 +551,6 @@
         </div>
       </div>
       
-      <!-- 房源卡片2 -->
       <div class="property-card">
         <div class="property-image">
           <img src="https://picsum.photos/id/102/600/400" alt="物件画像">
@@ -476,7 +577,6 @@
         </div>
       </div>
       
-      <!-- 房源卡片3 -->
       <div class="property-card">
         <div class="property-image">
           <img src="https://picsum.photos/id/103/600/400" alt="物件画像">
@@ -549,6 +649,12 @@
         options.forEach(option => {
           option.textContent = option.getAttribute(`data-${currentLang}`);
         });
+
+        // 更新提示消息的文本
+        const updateMessage = document.getElementById('updateMessage');
+        if (updateMessage.style.display === 'block') {
+          updateMessage.textContent = currentLang === 'ja' ? '現在のデータは最新です' : '目前已是最新数据';
+        }
       });
       
       // 地区选择功能
@@ -607,76 +713,82 @@
         stationList.style.display = 'block';
       });
       
-      // 选择都道府县
-      const prefectureItems = document.querySelectorAll('.prefecture-item');
-      let selectedPrefecture = '';
-      
-      prefectureItems.forEach(item => {
-        item.addEventListener('click', function() {
-          selectedPrefecture = this.getAttribute('data-value');
-          locationInput.value = selectedPrefecture;
-          
-          // 根据选择的都道府县显示相应的交通线路
-          showLinesForPrefecture(selectedPrefecture);
-          
-          // 自动切换到线路选择
-          lineNav.click();
+      // 添加多选功能
+      const selectedLocations = new Set();
+
+      function updateSelectedItems() {
+        const selectedItemsContainer = document.querySelector('.selected-items');
+        selectedItemsContainer.innerHTML = '';
+        
+        selectedLocations.forEach(location => {
+          const item = document.createElement('div');
+          item.className = 'selected-item';
+          item.innerHTML = `
+            ${location}
+            <span class="remove-item" data-value="${location}">×</span>
+          `;
+          selectedItemsContainer.appendChild(item);
+        });
+        
+        // 更新输入框显示
+        const locationInput = document.getElementById('location');
+        if (selectedLocations.size === 0) {
+          locationInput.setAttribute('data-placeholder', currentLang === 'ja' ? '都県、路線または駅を選択' : '选择都县、线路或车站');
+        }
+      }
+
+      // 处理选择框点击事件
+      document.querySelectorAll('.location-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+          const value = this.closest('[data-value]').getAttribute('data-value');
+          if (this.checked) {
+            selectedLocations.add(value);
+          } else {
+            selectedLocations.delete(value);
+          }
+          updateSelectedItems();
         });
       });
+
+      // 处理删除选中项
+      document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-item')) {
+          const value = e.target.getAttribute('data-value');
+          selectedLocations.delete(value);
+          // 更新对应的复选框状态
+          document.querySelectorAll('.location-checkbox').forEach(checkbox => {
+            if (checkbox.closest('[data-value]').getAttribute('data-value') === value) {
+              checkbox.checked = false;
+            }
+          });
+          updateSelectedItems();
+        }
+      });
       
-      // 根据选择的都道府县显示相应的交通线路
+      // 修改显示线路的函数
       function showLinesForPrefecture(prefecture) {
         const allLines = document.querySelectorAll('.line-item');
         allLines.forEach(line => line.style.display = 'none');
         
-        if (prefecture === '東京都') {
-          document.querySelectorAll('.tokyo-line').forEach(line => line.style.display = 'block');
-        } else if (prefecture === '大阪府') {
-          document.querySelectorAll('.osaka-line').forEach(line => line.style.display = 'block');
+        // 根据选择的都县显示相应的线路
+        switch(prefecture) {
+          case '東京都':
+            document.querySelectorAll('.line-item').forEach(line => line.style.display = 'block');
+            break;
+          case '神奈川県':
+            // 显示神奈川县的线路
+            document.querySelectorAll('.line-item[data-area="kanagawa"]').forEach(line => line.style.display = 'block');
+            break;
+          case '埼玉県':
+            // 显示埼玉县的线路
+            document.querySelectorAll('.line-item[data-area="saitama"]').forEach(line => line.style.display = 'block');
+            break;
+          case '千葉県':
+            // 显示千叶县的线路
+            document.querySelectorAll('.line-item[data-area="chiba"]').forEach(line => line.style.display = 'block');
+            break;
         }
-        // 可以添加更多都道府县的处理...
       }
-      
-      // 选择交通线路
-      const lineItems = document.querySelectorAll('.line-item');
-      let selectedLine = '';
-      
-      lineItems.forEach(item => {
-        item.addEventListener('click', function() {
-          selectedLine = this.getAttribute('data-value');
-          locationInput.value = `${selectedPrefecture} ${selectedLine}`;
-          
-          // 根据选择的线路显示相应的车站
-          showStationsForLine(selectedLine);
-          
-          // 自动切换到车站选择
-          stationNav.click();
-        });
-      });
-      
-      // 根据选择的线路显示相应的车站
-      function showStationsForLine(line) {
-        const allStations = document.querySelectorAll('.station-item');
-        allStations.forEach(station => station.style.display = 'none');
-        
-        if (line === '山手線') {
-          document.querySelectorAll('.yamanote-station').forEach(station => station.style.display = 'block');
-        } else if (line === '中央線') {
-          document.querySelectorAll('.chuo-station').forEach(station => station.style.display = 'block');
-        }
-        // 可以添加更多线路的处理...
-      }
-      
-      // 选择车站
-      const stationItems = document.querySelectorAll('.station-item');
-      
-      stationItems.forEach(item => {
-        item.addEventListener('click', function() {
-          const station = this.getAttribute('data-value');
-          locationInput.value = `${selectedPrefecture} ${selectedLine} ${station}`;
-          locationMenu.classList.remove('active');
-        });
-      });
       
       // 视图切换功能
       const viewButtons = document.querySelectorAll('.view-toggle button');
@@ -745,7 +857,7 @@
         });
       }
 
-      // 添加更新按钮功能
+      // 修改更新按钮功能
       const updateButton = document.getElementById('updateButton');
       if(updateButton) {
         updateButton.addEventListener('click', async function() {
@@ -766,35 +878,49 @@
               orientation: document.getElementById('orientation').value
             };
             
-            // 处理朝向筛选逻辑
-            function matchOrientation(propertyOrientation, selectedOrientation) {
-              if (!selectedOrientation) return true;
-              
-              // 将房屋朝向转换为数组（例如："南东" => ["south", "east"]）
-              const orientationMap = {
-                '北': ['north'],
-                '南': ['south'],
-                '东': ['east'],
-                '西': ['west'],
-                '东南': ['east', 'south'],
-                '西南': ['west', 'south'],
-                '东北': ['east', 'north'],
-                '西北': ['west', 'north']
-              };
-              
-              const propertyOrientations = orientationMap[propertyOrientation] || [];
-              return propertyOrientations.includes(selectedOrientation);
-            }
-            
             // 模拟数据更新过程
             await new Promise(resolve => setTimeout(resolve, 2000));
             
-            // 更新完成后显示提示
-            const message = currentLang === 'ja' 
-              ? '最新のデータに更新されました。\n\n更新された情報源:\n- SUUMO\n- at home\n- HOMES\n- Yahoo!不動産'
-              : '数据已更新完成。\n\n已更新来源:\n- SUUMO\n- at home\n- HOMES\n- Yahoo!房产';
+            // 模拟检查是否有新数据（这里随机模拟）
+            const hasNewData = Math.random() > 0.5;
             
-            alert(message);
+            if (hasNewData) {
+              // 模拟新数据，为部分房源添加NEW标签
+              const propertyCards = document.querySelectorAll('.property-card');
+              propertyCards.forEach(card => {
+                // 随机为30%的房源添加NEW标签
+                if (Math.random() < 0.3) {
+                  // 移除已有的NEW标签（如果存在）
+                  const existingBadge = card.querySelector('.new-badge');
+                  if (existingBadge) {
+                    existingBadge.remove();
+                  }
+                  
+                  // 添加新的NEW标签
+                  const newBadge = document.createElement('div');
+                  newBadge.className = 'new-badge';
+                  newBadge.textContent = 'NEW';
+                  card.querySelector('.property-image').appendChild(newBadge);
+                }
+              });
+              
+              // 显示更新成功提示
+              const message = currentLang === 'ja' 
+                ? '最新のデータに更新されました。\n\n更新された情報源:\n- SUUMO\n- at home\n- HOMES\n- Yahoo!不動産'
+                : '数据已更新完成。\n\n已更新来源:\n- SUUMO\n- at home\n- HOMES\n- Yahoo!房产';
+              
+              alert(message);
+            } else {
+              // 显示无更新提示
+              const updateMessage = document.getElementById('updateMessage');
+              updateMessage.style.display = 'block';
+              updateMessage.textContent = currentLang === 'ja' ? '現在のデータは最新です' : '目前已是最新数据';
+              
+              // 1.5秒后自动隐藏提示
+              setTimeout(() => {
+                updateMessage.style.display = 'none';
+              }, 1500);
+            }
             
             // 恢复按钮状态
             updateButton.disabled = false;
