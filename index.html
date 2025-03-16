@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <!-- 暂时注释掉Google Maps API，排除其影响 -->
-  <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA3PUO73p9_03jQEQC592HeJ72tDdNVsKc" defer></script> -->
+  <!-- 在head中取消注释Google Maps API -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA3PUO73p9_03jQEQC592HeJ72tDdNVsKc" defer></script>
   <style>
     /* 内联基本样式，以防main.css加载失败 */
     body {
@@ -609,6 +609,11 @@
         </div>
       </div>
     </div>
+
+    <!-- 在main标签内,list-view后添加地图容器 -->
+    <div id="map-view" style="display: none; height: 800px; margin-bottom: 20px; border-radius: 8px; overflow: hidden;">
+      <div id="map" style="width: 100%; height: 100%;"></div>
+    </div>
   </main>
   
   <footer style="background-color: #1a1a1a; color: white; padding: 20px 0; margin-top: 40px;">
@@ -617,7 +622,7 @@
     </div>
   </footer>
   
-  <!-- 添加交互功能的脚本 -->
+  <!-- 修改JavaScript部分,在script标签内添加地图相关功能 -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // 语言切换功能
@@ -792,6 +797,8 @@
       
       // 视图切换功能
       const viewButtons = document.querySelectorAll('.view-toggle button');
+      const listView = document.querySelector('.list-view');
+      const mapView = document.getElementById('map-view');
       
       viewButtons.forEach(button => {
         button.addEventListener('click', function() {
@@ -799,8 +806,17 @@
           this.classList.add('active');
           
           if(this.textContent.includes('地図') || this.textContent.includes('地图')) {
-            const alertText = currentLang === 'ja' ? '地図表示機能は開発中です。お待ちください！' : '地图视图功能正在开发中，敬请期待！';
-            alert(alertText);
+            listView.style.display = 'none';
+            mapView.style.display = 'block';
+            // 初始化地图
+            if (!map) {
+              initMap();
+            }
+            // 触发resize事件以确保地图正确显示
+            google.maps.event.trigger(map, 'resize');
+          } else {
+            listView.style.display = 'grid';
+            mapView.style.display = 'none';
           }
         });
       });
@@ -938,6 +954,90 @@
             updateButton.disabled = false;
             updateButton.textContent = originalText;
           }
+        });
+      }
+
+      // 添加地图相关功能
+      let map;
+      let markers = [];
+      const properties = [
+        {
+          position: { lat: 35.6894, lng: 139.6917 }, // 新宿
+          price: '125.5万円',
+          address: '東京都新宿区1-2-3',
+          area: '35㎡',
+          layout: '1LDK',
+          built: '2018',
+          image: 'https://picsum.photos/id/101/600/400'
+        },
+        {
+          position: { lat: 35.6580, lng: 139.7016 }, // 渋谷
+          price: '78.0万円',
+          address: '東京都渋谷区4-5-6',
+          area: '25㎡',
+          layout: '1K',
+          built: '2015',
+          image: 'https://picsum.photos/id/102/600/400'
+        },
+        {
+          position: { lat: 35.6585, lng: 139.7454 }, // 港区
+          price: '156.8万円',
+          address: '東京都港区7-8-9',
+          area: '48㎡',
+          layout: '2LDK',
+          built: '2020',
+          image: 'https://picsum.photos/id/103/600/400'
+        }
+      ];
+
+      // 初始化地图
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: { lat: 35.6894, lng: 139.6917 }, // 默认中心点设在新宿
+          zoom: 13,
+          styles: [
+            {
+              featureType: 'poi',
+              elementType: 'labels',
+              stylers: [{ visibility: 'off' }]
+            }
+          ]
+        });
+
+        // 创建信息窗口
+        const infoWindow = new google.maps.InfoWindow();
+
+        // 为每个房源添加标记
+        properties.forEach(property => {
+          const marker = new google.maps.Marker({
+            position: property.position,
+            map: map,
+            animation: google.maps.Animation.DROP
+          });
+
+          // 创建信息窗口内容
+          const content = `
+            <div style="width: 250px;">
+              <img src="${property.image}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 4px;">
+              <div style="padding: 10px;">
+                <div style="font-size: 1.2rem; font-weight: bold; color: #ff4d4d;">${property.price}</div>
+                <div style="font-size: 0.9rem; color: #666; margin: 5px 0;">${property.address}</div>
+                <div style="display: flex; gap: 10px; font-size: 0.9rem; color: #333;">
+                  <span>${property.area}</span>
+                  <span>${property.layout}</span>
+                  <span>築${property.built}年</span>
+                </div>
+              </div>
+            </div>
+          `;
+
+          // 添加点击事件
+          marker.addListener('click', () => {
+            infoWindow.setContent(content);
+            infoWindow.open(map, marker);
+          });
+
+          markers.push(marker);
         });
       }
     });
