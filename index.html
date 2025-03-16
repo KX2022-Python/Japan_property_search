@@ -107,6 +107,7 @@
       height: 200px;
       background-color: #eee;
       position: relative;
+      cursor: pointer;
     }
     
     .property-image img {
@@ -205,7 +206,7 @@
       color: #bbb;
     }
 
-    .new-badge {
+    .new-badge, .viewed-badge {
       position: absolute;
       top: 10px;
       left: 10px;
@@ -218,9 +219,39 @@
       animation: fadeInOut 0.5s ease-in-out;
     }
 
-    @keyframes fadeInOut {
-      0% { opacity: 0; transform: translateY(-10px); }
-      100% { opacity: 1; transform: translateY(0); }
+    .viewed-badge {
+      background-color: #666;
+    }
+
+    .favorite-btn {
+      position: absolute;
+      top: 10px;
+      right: 50px;
+      z-index: 2;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      text-shadow: 0 0 3px rgba(0,0,0,0.5);
+      transition: transform 0.2s ease;
+    }
+
+    .favorite-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .favorite-btn.active {
+      color: #ffd700;
+    }
+
+    /* 添加收藏动画 */
+    @keyframes favorite {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+
+    .favorite-animation {
+      animation: favorite 0.3s ease;
     }
 
     .location-group-title {
@@ -261,6 +292,48 @@
       font-weight: bold;
       padding: 8px 12px;
       background-color: #f5f5f5;
+    }
+
+    .multi-select {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .multi-select .selected-items {
+      min-height: 22px;
+    }
+
+    .multi-select .options-menu {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .multi-select .option {
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    .multi-select .option:hover {
+      background-color: #f5f5f5;
+    }
+
+    .multi-select .selected-tag {
+      background-color: #e0e0e0;
+      padding: 2px 8px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin: 2px;
+    }
+
+    .multi-select .remove-tag {
+      cursor: pointer;
+      color: #666;
+      font-size: 12px;
+    }
+
+    .multi-select .remove-tag:hover {
+      color: #ff4d4d;
     }
   </style>
 </head>
@@ -483,27 +556,61 @@
           </div>
           
           <div>
-            <label for="rooms" style="display: block; margin-bottom: 5px;" data-ja="間取り" data-zh="房间数">間取り</label>
-            <select id="rooms" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
-              <option value="" data-ja="指定なし" data-zh="不限">指定なし</option>
-              <option value="1" data-ja="1R/1K" data-zh="1R/1K">1R/1K</option>
-              <option value="1.5" data-ja="1DK/1LDK" data-zh="1DK/1LDK">1DK/1LDK</option>
-              <option value="2" data-ja="2K/2DK" data-zh="2K/2DK">2K/2DK</option>
-              <option value="2.5" data-ja="2LDK" data-zh="2LDK">2LDK</option>
-              <option value="3" data-ja="3K/3DK/3LDK" data-zh="3K/3DK/3LDK">3K/3DK/3LDK</option>
-              <option value="4" data-ja="4K以上" data-zh="4K以上">4K以上</option>
-            </select>
+            <label for="rooms" style="display: block; margin-bottom: 5px;" data-ja="間取り（複数選択可）" data-zh="房型（可多选）">間取り（複数選択可）</label>
+            <div class="multi-select" id="rooms-select" style="width: 100%; min-height: 38px; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px; background-color: white;">
+              <div class="selected-items" style="display: flex; flex-wrap: wrap; gap: 5px;"></div>
+              <div class="options-menu" style="display: none; position: absolute; width: 100%; background: white; border: 1px solid #e0e0e0; border-radius: 4px; margin-top: 5px; max-height: 200px; overflow-y: auto; z-index: 1000;">
+                <div class="option">
+                  <input type="checkbox" id="room-1" value="1">
+                  <label for="room-1" data-ja="1R/1K" data-zh="1R/1K">1R/1K</label>
+                </div>
+                <div class="option">
+                  <input type="checkbox" id="room-1.5" value="1.5">
+                  <label for="room-1.5" data-ja="1DK/1LDK" data-zh="1DK/1LDK">1DK/1LDK</label>
+                </div>
+                <div class="option">
+                  <input type="checkbox" id="room-2" value="2">
+                  <label for="room-2" data-ja="2K/2DK" data-zh="2K/2DK">2K/2DK</label>
+                </div>
+                <div class="option">
+                  <input type="checkbox" id="room-2.5" value="2.5">
+                  <label for="room-2.5" data-ja="2LDK" data-zh="2LDK">2LDK</label>
+                </div>
+                <div class="option">
+                  <input type="checkbox" id="room-3" value="3">
+                  <label for="room-3" data-ja="3K/3DK/3LDK" data-zh="3K/3DK/3LDK">3K/3DK/3LDK</label>
+                </div>
+                <div class="option">
+                  <input type="checkbox" id="room-4" value="4">
+                  <label for="room-4" data-ja="4K以上" data-zh="4K以上">4K以上</label>
+                </div>
+              </div>
+            </div>
           </div>
           
           <div>
-            <label for="orientation" style="display: block; margin-bottom: 5px;" data-ja="リビング向き" data-zh="客厅朝向">リビング向き</label>
-            <select id="orientation" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
-              <option value="" data-ja="指定なし" data-zh="不限">指定なし</option>
-              <option value="north" data-ja="北向き" data-zh="朝北">北向き</option>
-              <option value="south" data-ja="南向き" data-zh="朝南">南向き</option>
-              <option value="east" data-ja="東向き" data-zh="朝东">東向き</option>
-              <option value="west" data-ja="西向き" data-zh="朝西">西向き</option>
-            </select>
+            <label for="orientation" style="display: block; margin-bottom: 5px;" data-ja="リビング向き（複数選択可）" data-zh="朝向（可多选）">リビング向き（複数選択可）</label>
+            <div class="multi-select" id="orientation-select" style="width: 100%; min-height: 38px; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px; background-color: white;">
+              <div class="selected-items" style="display: flex; flex-wrap: wrap; gap: 5px;"></div>
+              <div class="options-menu" style="display: none; position: absolute; width: 100%; background: white; border: 1px solid #e0e0e0; border-radius: 4px; margin-top: 5px; max-height: 200px; overflow-y: auto; z-index: 1000;">
+                <div class="option">
+                  <input type="checkbox" id="north" value="north">
+                  <label for="north" data-ja="北向き" data-zh="朝北">北向き</label>
+                </div>
+                <div class="option">
+                  <input type="checkbox" id="south" value="south">
+                  <label for="south" data-ja="南向き" data-zh="朝南">南向き</label>
+                </div>
+                <div class="option">
+                  <input type="checkbox" id="east" value="east">
+                  <label for="east" data-ja="東向き" data-zh="朝东">東向き</label>
+                </div>
+                <div class="option">
+                  <input type="checkbox" id="west" value="west">
+                  <label for="west" data-ja="西向き" data-zh="朝西">西向き</label>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -524,6 +631,8 @@
     <div class="list-view">
       <div class="property-card">
         <div class="property-image">
+          <div class="status-badge"></div>
+          <div class="favorite-btn" data-ja="お気に入り追加" data-zh="添加收藏">★</div>
           <img src="https://picsum.photos/id/101/600/400" alt="物件画像">
           <div style="position: absolute; top: 10px; right: 10px; background-color: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;" data-ja="3つの情報源" data-zh="3个来源">
             3つの情報源
@@ -553,6 +662,8 @@
       
       <div class="property-card">
         <div class="property-image">
+          <div class="status-badge"></div>
+          <div class="favorite-btn" data-ja="お気に入り追加" data-zh="添加收藏">★</div>
           <img src="https://picsum.photos/id/102/600/400" alt="物件画像">
           <div style="position: absolute; top: 10px; right: 10px; background-color: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;" data-ja="2つの情報源" data-zh="2个来源">
             2つの情報源
@@ -579,6 +690,8 @@
       
       <div class="property-card">
         <div class="property-image">
+          <div class="status-badge"></div>
+          <div class="favorite-btn" data-ja="お気に入り追加" data-zh="添加收藏">★</div>
           <img src="https://picsum.photos/id/103/600/400" alt="物件画像">
           <div style="position: absolute; top: 10px; right: 10px; background-color: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;" data-ja="4つの情報源" data-zh="4个来源">
             4つの情報源
@@ -660,6 +773,11 @@
         if (updateMessage.style.display === 'block') {
           updateMessage.textContent = currentLang === 'ja' ? '現在のデータは最新です' : '目前已是最新数据';
         }
+
+        // 更新已看标签的文本
+        document.querySelectorAll('.viewed-badge').forEach(badge => {
+          badge.textContent = currentLang === 'ja' ? '閲覧済' : '已看';
+        });
       });
       
       // 地区选择功能
@@ -837,37 +955,26 @@
         filterForm.addEventListener('submit', function(e) {
           e.preventDefault();
           
-          // 获取筛选条件值
+          // 获取多选值
+          const getSelectedValues = (selectId) => {
+            const checkboxes = document.querySelectorAll(`#${selectId} input[type="checkbox"]:checked`);
+            return Array.from(checkboxes).map(cb => cb.value);
+          };
+          
+          const selectedRooms = getSelectedValues('rooms-select');
+          const selectedOrientations = getSelectedValues('orientation-select');
+          
+          // 其他筛选条件...
           const location = document.getElementById('location').value;
           const priceMin = document.getElementById('priceMin').value;
           const priceMax = document.getElementById('priceMax').value;
           const areaMin = document.getElementById('areaMin').value;
           const areaMax = document.getElementById('areaMax').value;
-          const rooms = document.getElementById('rooms').value;
-          const orientation = document.getElementById('orientation').value;
           
-          // 根据当前语言显示不同的提示
-          let orientationText = '';
-          if (orientation) {
-            if (currentLang === 'ja') {
-              orientationText = document.querySelector(`#orientation option[value="${orientation}"]`).textContent;
-            } else {
-              const orientationMap = {
-                'north': '朝北',
-                'south': '朝南',
-                'east': '朝东',
-                'west': '朝西'
-              };
-              orientationText = orientationMap[orientation];
-            }
-          }
-          
-          let alertMessage = '';
-          if (currentLang === 'ja') {
-            alertMessage = `検索条件を適用しました。\n地区: ${location || '不限'}\n価格: ${priceMin || '0'} - ${priceMax || '不限'}\n面積: ${areaMin || '0'} - ${areaMax || '不限'}\n間取り: ${rooms || '不限'}\nリビング向き: ${orientationText || '不限'}`;
-          } else {
-            alertMessage = `已应用筛选条件:\n地区: ${location || '不限'}\n价格: ${priceMin || '0'} - ${priceMax || '不限'}\n面积: ${areaMin || '0'} - ${areaMax || '不限'}\n房间数: ${rooms || '不限'}\n客厅朝向: ${orientationText || '不限'}`;
-          }
+          // 显示筛选条件
+          const alertMessage = currentLang === 'ja' 
+            ? `検索条件:\n地区: ${Array.from(selectedLocations).join(', ') || '指定なし'}\n価格: ${priceMin || '0'} - ${priceMax || '不限'}\n面積: ${areaMin || '0'} - ${areaMax || '不限'}\n間取り: ${selectedRooms.join(', ') || '指定なし'}\n向き: ${selectedOrientations.join(', ') || '指定なし'}`
+            : `筛选条件:\n地区: ${Array.from(selectedLocations).join(', ') || '不限'}\n价格: ${priceMin || '0'} - ${priceMax || '不限'}\n面积: ${areaMin || '0'} - ${areaMax || '不限'}\n房型: ${selectedRooms.join(', ') || '不限'}\n朝向: ${selectedOrientations.join(', ') || '不限'}`;
           
           alert(alertMessage);
         });
@@ -890,8 +997,8 @@
               priceMax: document.getElementById('priceMax').value,
               areaMin: document.getElementById('areaMin').value,
               areaMax: document.getElementById('areaMax').value,
-              rooms: document.getElementById('rooms').value,
-              orientation: document.getElementById('orientation').value
+              rooms: document.getElementById('rooms-select').value,
+              orientation: document.getElementById('orientation-select').value
             };
             
             // 模拟数据更新过程
@@ -1039,6 +1146,165 @@
 
           markers.push(marker);
         });
+      }
+
+      // 初始化多选功能
+      function initMultiSelect(selectId, options) {
+        const container = document.getElementById(selectId);
+        const selectedItems = container.querySelector('.selected-items');
+        const optionsMenu = container.querySelector('.options-menu');
+        const checkboxes = optionsMenu.querySelectorAll('input[type="checkbox"]');
+        
+        // 点击容器显示/隐藏选项菜单
+        container.addEventListener('click', (e) => {
+          e.stopPropagation();
+          optionsMenu.style.display = optionsMenu.style.display === 'none' ? 'block' : 'none';
+        });
+        
+        // 点击其他地方关闭菜单
+        document.addEventListener('click', () => {
+          optionsMenu.style.display = 'none';
+        });
+        
+        // 处理选项选择
+        checkboxes.forEach(checkbox => {
+          checkbox.addEventListener('change', () => {
+            updateSelectedItems();
+          });
+        });
+        
+        // 更新已选项显示
+        function updateSelectedItems() {
+          selectedItems.innerHTML = '';
+          checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+              const label = checkbox.nextElementSibling.textContent;
+              const tag = document.createElement('div');
+              tag.className = 'selected-tag';
+              tag.innerHTML = `
+                ${label}
+                <span class="remove-tag" data-value="${checkbox.value}">×</span>
+              `;
+              selectedItems.appendChild(tag);
+            }
+          });
+        }
+        
+        // 处理删除标签
+        selectedItems.addEventListener('click', (e) => {
+          if (e.target.classList.contains('remove-tag')) {
+            const value = e.target.dataset.value;
+            const checkbox = optionsMenu.querySelector(`input[value="${value}"]`);
+            checkbox.checked = false;
+            updateSelectedItems();
+          }
+        });
+      }
+
+      // 在文档加载完成后初始化多选功能
+      document.addEventListener('DOMContentLoaded', () => {
+        initMultiSelect('rooms-select');
+        initMultiSelect('orientation-select');
+      });
+
+      // 添加查看和收藏功能
+      let viewedProperties = JSON.parse(localStorage.getItem('viewedProperties')) || [];
+      let favoriteProperties = JSON.parse(localStorage.getItem('favoriteProperties')) || [];
+      
+      // 初始化所有房源卡片
+      document.querySelectorAll('.property-card').forEach((card, index) => {
+        const propertyId = `property-${index}`; // 为每个房源创建唯一ID
+        card.setAttribute('data-property-id', propertyId);
+        
+        // 创建状态标签容器
+        const statusBadge = card.querySelector('.status-badge');
+        
+        // 创建收藏按钮
+        const favoriteBtn = card.querySelector('.favorite-btn');
+        
+        // 初始化状态
+        if (viewedProperties.includes(propertyId)) {
+          updateViewedStatus(statusBadge, true);
+        }
+        if (favoriteProperties.includes(propertyId)) {
+          favoriteBtn.classList.add('active');
+        }
+        
+        // 添加点击查看事件
+        card.addEventListener('click', function(e) {
+          // 如果点击的是收藏按钮，不触发查看事件
+          if (e.target.classList.contains('favorite-btn')) {
+            return;
+          }
+          
+          if (!viewedProperties.includes(propertyId)) {
+            viewedProperties.push(propertyId);
+            localStorage.setItem('viewedProperties', JSON.stringify(viewedProperties));
+            updateViewedStatus(statusBadge, true);
+          }
+        });
+        
+        // 添加收藏事件
+        favoriteBtn.addEventListener('click', function(e) {
+          e.stopPropagation(); // 阻止冒泡，避免触发卡片的点击事件
+          
+          this.classList.toggle('active');
+          this.classList.add('favorite-animation');
+          
+          // 移除动画类
+          setTimeout(() => {
+            this.classList.remove('favorite-animation');
+          }, 300);
+          
+          if (this.classList.contains('active')) {
+            if (!favoriteProperties.includes(propertyId)) {
+              favoriteProperties.push(propertyId);
+              showToast(currentLang === 'ja' ? 'お気に入りに追加しました' : '已添加到收藏');
+            }
+          } else {
+            favoriteProperties = favoriteProperties.filter(id => id !== propertyId);
+            showToast(currentLang === 'ja' ? 'お気に入りから削除しました' : '已从收藏中移除');
+          }
+          
+          localStorage.setItem('favoriteProperties', JSON.stringify(favoriteProperties));
+        });
+      });
+      
+      // 更新查看状态的函数
+      function updateViewedStatus(statusBadge, isViewed) {
+        const existingBadge = statusBadge.querySelector('.new-badge, .viewed-badge');
+        if (existingBadge) {
+          existingBadge.remove();
+        }
+        
+        if (isViewed) {
+          const viewedBadge = document.createElement('div');
+          viewedBadge.className = 'viewed-badge';
+          viewedBadge.textContent = currentLang === 'ja' ? '閲覧済' : '已看';
+          statusBadge.appendChild(viewedBadge);
+        }
+      }
+      
+      // 显示提示消息的函数
+      function showToast(message) {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+          position: fixed;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background-color: rgba(0, 0, 0, 0.8);
+          color: white;
+          padding: 10px 20px;
+          border-radius: 4px;
+          z-index: 1000;
+        `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.remove();
+        }, 2000);
       }
     });
   </script>
