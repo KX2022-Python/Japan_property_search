@@ -335,6 +335,150 @@
     .multi-select .remove-tag:hover {
       color: #ff4d4d;
     }
+
+    .target-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #fff;
+      border: 2px solid #e0e0e0;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .target-button:hover {
+      border-color: #ff4d4d;
+      color: #ff4d4d;
+    }
+
+    .target-icon {
+      font-size: 20px;
+    }
+
+    .filter-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    .modal-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      max-height: calc(90vh - 140px);
+    }
+
+    .modal-footer {
+      padding: 20px;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .filter-section {
+      margin-bottom: 24px;
+    }
+
+    .filter-section h4 {
+      margin-bottom: 12px;
+      font-weight: bold;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .scrollable {
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 8px;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+    }
+
+    .line-category {
+      margin-bottom: 16px;
+    }
+
+    .line-category h5 {
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .close-button {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .reset-button {
+      padding: 8px 16px;
+      border: 1px solid #e0e0e0;
+      background-color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .apply-button {
+      padding: 8px 24px;
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .price-range {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .price-range select {
+      padding: 8px;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      width: 150px;
+    }
   </style>
 </head>
 <body>
@@ -364,268 +508,114 @@
     </div>
     
     <div class="filters">
-      <h3 data-ja="検索条件" data-zh="筛选条件">検索条件</h3>
-      <form>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
-          <div class="location-dropdown">
-            <label for="location" style="display: block; margin-bottom: 5px;" data-ja="エリア（複数選択可）" data-zh="地区（可多选）">エリア（複数選択可）</label>
-            <div id="location" style="width: 100%; min-height: 38px; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px; cursor: pointer; background-color: white;" data-ja-placeholder="都県、路線または駅を選択" data-zh-placeholder="选择都县、线路或车站">
-              <div class="selected-items" style="display: flex; flex-wrap: wrap; gap: 5px;"></div>
-            </div>
-            
-            <div class="location-menu" id="locationMenu">
-              <div class="location-nav">
-                <span class="location-nav-prefecture active" data-ja="都県" data-zh="都县">都県</span>
-                <span class="location-nav-line" data-ja="路線" data-zh="线路">路線</span>
-                <span class="location-nav-station" data-ja="駅" data-zh="车站">駅</span>
-              </div>
-              
-              <div class="prefecture-list">
-                <div class="prefecture-item" data-value="東京都">
-                  <input type="checkbox" id="tokyo" class="location-checkbox">
-                  <label for="tokyo">東京都</label>
-                </div>
-                <div class="prefecture-item" data-value="神奈川県">
-                  <input type="checkbox" id="kanagawa" class="location-checkbox">
-                  <label for="kanagawa">神奈川県</label>
-                </div>
-                <div class="prefecture-item" data-value="埼玉県">
-                  <input type="checkbox" id="saitama" class="location-checkbox">
-                  <label for="saitama">埼玉県</label>
-                </div>
-                <div class="prefecture-item" data-value="千葉県">
-                  <input type="checkbox" id="chiba" class="location-checkbox">
-                  <label for="chiba">千葉県</label>
-                </div>
-              </div>
-              
-              <div class="line-list" style="display: none;">
-                <div class="line-group">
-                  <div class="line-group-title">JR線</div>
-                  <div class="line-item" data-value="山手線">
-                    <input type="checkbox" id="yamanote" class="location-checkbox">
-                    <label for="yamanote">山手線</label>
-                  </div>
-                  <div class="line-item" data-value="中央線">
-                    <input type="checkbox" id="chuo" class="location-checkbox">
-                    <label for="chuo">中央線</label>
-                  </div>
-                  <div class="line-item" data-value="総武線">
-                    <input type="checkbox" id="sobu" class="location-checkbox">
-                    <label for="sobu">総武線</label>
-                  </div>
-                  <div class="line-item" data-value="埼京線">
-                    <input type="checkbox" id="saikyo" class="location-checkbox">
-                    <label for="saikyo">埼京線</label>
-                  </div>
-                </div>
-                
-                <div class="line-group">
-                  <div class="line-group-title">東京メトロ</div>
-                  <div class="line-item" data-value="銀座線">
-                    <input type="checkbox" id="ginza" class="location-checkbox">
-                    <label for="ginza">銀座線</label>
-                  </div>
-                  <div class="line-item" data-value="丸ノ内線">
-                    <input type="checkbox" id="marunouchi" class="location-checkbox">
-                    <label for="marunouchi">丸ノ内線</label>
-                  </div>
-                  <div class="line-item" data-value="日比谷線">
-                    <input type="checkbox" id="hibiya" class="location-checkbox">
-                    <label for="hibiya">日比谷線</label>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="station-list" style="display: none;">
-                <div class="station-group yamanote-stations">
-                  <div class="station-group-title">山手線</div>
-                  <div class="station-item" data-value="新宿">
-                    <input type="checkbox" id="shinjuku" class="location-checkbox">
-                    <label for="shinjuku">新宿駅</label>
-                  </div>
-                  <div class="station-item" data-value="渋谷">
-                    <input type="checkbox" id="shibuya" class="location-checkbox">
-                    <label for="shibuya">渋谷駅</label>
-                  </div>
-                  <div class="station-item" data-value="池袋">
-                    <input type="checkbox" id="ikebukuro" class="location-checkbox">
-                    <label for="ikebukuro">池袋駅</label>
-                  </div>
-                </div>
-                
-                <div class="station-group chuo-stations">
-                  <div class="station-group-title">中央線</div>
-                  <div class="station-item" data-value="中野">
-                    <input type="checkbox" id="nakano" class="location-checkbox">
-                    <label for="nakano">中野駅</label>
-                  </div>
-                  <div class="station-item" data-value="高円寺">
-                    <input type="checkbox" id="koenji" class="location-checkbox">
-                    <label for="koenji">高円寺駅</label>
-                  </div>
-                  <div class="station-item" data-value="阿佐ヶ谷">
-                    <input type="checkbox" id="asagaya" class="location-checkbox">
-                    <label for="asagaya">阿佐ヶ谷駅</label>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div>
-            <label for="priceMin" style="display: block; margin-bottom: 5px;" data-ja="最低価格 (万円)" data-zh="最低价格 (万日币)">最低価格 (万円)</label>
-            <select id="priceMin" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
-              <option value="" data-ja="指定なし" data-zh="不限">指定なし</option>
-              <option value="1000">1,000</option>
-              <option value="2000">2,000</option>
-              <option value="3000">3,000</option>
-              <option value="4000">4,000</option>
-              <option value="5000">5,000</option>
-              <option value="6000">6,000</option>
-              <option value="7000">7,000</option>
-              <option value="8000">8,000</option>
-              <option value="9000">9,000</option>
-              <option value="10000">10,000</option>
-              <option value="12000">12,000</option>
-              <option value="15000">15,000</option>
-              <option value="20000">20,000</option>
-              <option value="25000">25,000</option>
-              <option value="30000">30,000</option>
-            </select>
-          </div>
-          
-          <div>
-            <label for="priceMax" style="display: block; margin-bottom: 5px;" data-ja="最高価格 (万円)" data-zh="最高价格 (万日币)">最高価格 (万円)</label>
-            <select id="priceMax" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
-              <option value="" data-ja="指定なし" data-zh="不限">指定なし</option>
-              <option value="1000">1,000</option>
-              <option value="2000">2,000</option>
-              <option value="3000">3,000</option>
-              <option value="4000">4,000</option>
-              <option value="5000">5,000</option>
-              <option value="6000">6,000</option>
-              <option value="7000">7,000</option>
-              <option value="8000">8,000</option>
-              <option value="9000">9,000</option>
-              <option value="10000">10,000</option>
-              <option value="12000">12,000</option>
-              <option value="15000">15,000</option>
-              <option value="20000">20,000</option>
-              <option value="25000">25,000</option>
-              <option value="30000">30,000</option>
-            </select>
-          </div>
-          
-          <div>
-            <label for="areaMin" style="display: block; margin-bottom: 5px;" data-ja="最小面積 (㎡)" data-zh="最小面积 (㎡)">最小面積 (㎡)</label>
-            <select id="areaMin" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
-              <option value="" data-ja="指定なし" data-zh="不限">指定なし</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-              <option value="60">60</option>
-              <option value="70">70</option>
-              <option value="80">80</option>
-              <option value="90">90</option>
-              <option value="100">100</option>
-              <option value="120">120</option>
-              <option value="140">140</option>
-              <option value="160">160</option>
-              <option value="180">180</option>
-              <option value="200">200</option>
-            </select>
-          </div>
-          
-          <div>
-            <label for="areaMax" style="display: block; margin-bottom: 5px;" data-ja="最大面積 (㎡)" data-zh="最大面积 (㎡)">最大面積 (㎡)</label>
-            <select id="areaMax" style="width: 100%; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px;">
-              <option value="" data-ja="指定なし" data-zh="不限">指定なし</option>
-              <option value="40">40</option>
-              <option value="50">50</option>
-              <option value="60">60</option>
-              <option value="70">70</option>
-              <option value="80">80</option>
-              <option value="90">90</option>
-              <option value="100">100</option>
-              <option value="120">120</option>
-              <option value="140">140</option>
-              <option value="160">160</option>
-              <option value="180">180</option>
-              <option value="200">200</option>
-            </select>
-          </div>
-          
-          <div>
-            <label for="rooms" style="display: block; margin-bottom: 5px;" data-ja="間取り（複数選択可）" data-zh="房型（可多选）">間取り（複数選択可）</label>
-            <div class="multi-select" id="rooms-select" style="width: 100%; min-height: 38px; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px; background-color: white;">
-              <div class="selected-items" style="display: flex; flex-wrap: wrap; gap: 5px;"></div>
-              <div class="options-menu" style="display: none; position: absolute; width: 100%; background: white; border: 1px solid #e0e0e0; border-radius: 4px; margin-top: 5px; max-height: 200px; overflow-y: auto; z-index: 1000;">
-                <div class="option">
-                  <input type="checkbox" id="room-1" value="1">
-                  <label for="room-1" data-ja="1R/1K" data-zh="1R/1K">1R/1K</label>
-                </div>
-                <div class="option">
-                  <input type="checkbox" id="room-1.5" value="1.5">
-                  <label for="room-1.5" data-ja="1DK/1LDK" data-zh="1DK/1LDK">1DK/1LDK</label>
-                </div>
-                <div class="option">
-                  <input type="checkbox" id="room-2" value="2">
-                  <label for="room-2" data-ja="2K/2DK" data-zh="2K/2DK">2K/2DK</label>
-                </div>
-                <div class="option">
-                  <input type="checkbox" id="room-2.5" value="2.5">
-                  <label for="room-2.5" data-ja="2LDK" data-zh="2LDK">2LDK</label>
-                </div>
-                <div class="option">
-                  <input type="checkbox" id="room-3" value="3">
-                  <label for="room-3" data-ja="3K/3DK/3LDK" data-zh="3K/3DK/3LDK">3K/3DK/3LDK</label>
-                </div>
-                <div class="option">
-                  <input type="checkbox" id="room-4" value="4">
-                  <label for="room-4" data-ja="4K以上" data-zh="4K以上">4K以上</label>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div>
-            <label for="orientation" style="display: block; margin-bottom: 5px;" data-ja="リビング向き（複数選択可）" data-zh="朝向（可多选）">リビング向き（複数選択可）</label>
-            <div class="multi-select" id="orientation-select" style="width: 100%; min-height: 38px; padding: 8px; border: 1px solid #e0e0e0; border-radius: 4px; background-color: white;">
-              <div class="selected-items" style="display: flex; flex-wrap: wrap; gap: 5px;"></div>
-              <div class="options-menu" style="display: none; position: absolute; width: 100%; background: white; border: 1px solid #e0e0e0; border-radius: 4px; margin-top: 5px; max-height: 200px; overflow-y: auto; z-index: 1000;">
-                <div class="option">
-                  <input type="checkbox" id="north" value="north">
-                  <label for="north" data-ja="北向き" data-zh="朝北">北向き</label>
-                </div>
-                <div class="option">
-                  <input type="checkbox" id="south" value="south">
-                  <label for="south" data-ja="南向き" data-zh="朝南">南向き</label>
-                </div>
-                <div class="option">
-                  <input type="checkbox" id="east" value="east">
-                  <label for="east" data-ja="東向き" data-zh="朝东">東向き</label>
-                </div>
-                <div class="option">
-                  <input type="checkbox" id="west" value="west">
-                  <label for="west" data-ja="西向き" data-zh="朝西">西向き</label>
-                </div>
-              </div>
-            </div>
-          </div>
+      <button id="targetButton" class="target-button" data-ja="目標を設定" data-zh="设置目标">
+        <span class="target-icon">🎯</span>
+        <span class="target-text" data-ja="目標を設定" data-zh="设置目标">目標を設定</span>
+      </button>
+    </div>
+
+    <!-- 添加筛选弹窗 -->
+    <div id="filterModal" class="filter-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 data-ja="目標条件を設定" data-zh="设置目标条件">目標条件を設定</h3>
+          <button class="close-button">&times;</button>
         </div>
         
-        <div style="display: flex; justify-content: flex-end; margin-top: 15px;">
-          <button type="button" id="updateButton" style="background-color: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 4px; margin-right: 10px; cursor: pointer;" data-ja="データを更新" data-zh="更新数据">
-            データを更新
-          </button>
-          <button type="button" style="background-color: transparent; border: 1px solid #e0e0e0; padding: 8px 16px; border-radius: 4px; margin-right: 10px; cursor: pointer;" data-ja="条件をリセット" data-zh="重置筛选">
-            条件をリセット
-          </button>
-          <button type="submit" style="background-color: #ff4d4d; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;" data-ja="検索する" data-zh="应用筛选">
-            検索する
-          </button>
+        <div class="modal-body">
+          <!-- 区域选择 -->
+          <div class="filter-section">
+            <h4 data-ja="エリア" data-zh="区域">エリア</h4>
+            <div class="filter-group">
+              <div class="filter-row">
+                <label data-ja="都県" data-zh="都县">都県</label>
+                <div class="checkbox-group">
+                  <label><input type="checkbox" value="東京都">東京都</label>
+                  <label><input type="checkbox" value="神奈川県">神奈川県</label>
+                  <label><input type="checkbox" value="埼玉県">埼玉県</label>
+                  <label><input type="checkbox" value="千葉県">千葉県</label>
+                </div>
+              </div>
+              <div class="filter-row">
+                <label data-ja="路線" data-zh="线路">路線</label>
+                <div class="checkbox-group scrollable">
+                  <!-- JR线路 -->
+                  <div class="line-category">
+                    <h5>JR線</h5>
+                    <label><input type="checkbox" value="山手線">山手線</label>
+                    <label><input type="checkbox" value="中央線">中央線</label>
+                    <label><input type="checkbox" value="総武線">総武線</label>
+                  </div>
+                  <!-- 地铁线路 -->
+                  <div class="line-category">
+                    <h5>東京メトロ</h5>
+                    <label><input type="checkbox" value="銀座線">銀座線</label>
+                    <label><input type="checkbox" value="丸ノ内線">丸ノ内線</label>
+                    <label><input type="checkbox" value="日比谷線">日比谷線</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 价格范围 -->
+          <div class="filter-section">
+            <h4 data-ja="価格" data-zh="价格">価格</h4>
+            <div class="price-range">
+              <select id="priceMin">
+                <option value="">下限なし</option>
+                <option value="1000">1,000万円</option>
+                <!-- ... 其他选项 ... -->
+              </select>
+              <span>～</span>
+              <select id="priceMax">
+                <option value="">上限なし</option>
+                <option value="3000">3,000万円</option>
+                <!-- ... 其他选项 ... -->
+              </select>
+            </div>
+          </div>
+
+          <!-- 面积范围 -->
+          <div class="filter-section">
+            <h4 data-ja="面積" data-zh="面积">面積</h4>
+            <div class="checkbox-group">
+              <label><input type="checkbox" value="40-60">40㎡～60㎡</label>
+              <label><input type="checkbox" value="60-80">60㎡～80㎡</label>
+              <label><input type="checkbox" value="80-100">80㎡～100㎡</label>
+              <label><input type="checkbox" value="100">100㎡以上</label>
+            </div>
+          </div>
+
+          <!-- 房型 -->
+          <div class="filter-section">
+            <h4 data-ja="間取り" data-zh="房型">間取り</h4>
+            <div class="checkbox-group">
+              <label><input type="checkbox" value="1K">1R/1K</label>
+              <label><input type="checkbox" value="1LDK">1DK/1LDK</label>
+              <label><input type="checkbox" value="2K">2K/2DK</label>
+              <label><input type="checkbox" value="2LDK">2LDK</label>
+              <label><input type="checkbox" value="3LDK">3LDK以上</label>
+            </div>
+          </div>
+
+          <!-- 朝向 -->
+          <div class="filter-section">
+            <h4 data-ja="向き" data-zh="朝向">向き</h4>
+            <div class="checkbox-group">
+              <label><input type="checkbox" value="south">南向き</label>
+              <label><input type="checkbox" value="east">東向き</label>
+              <label><input type="checkbox" value="west">西向き</label>
+              <label><input type="checkbox" value="north">北向き</label>
+            </div>
+          </div>
         </div>
-      </form>
+
+        <div class="modal-footer">
+          <button class="reset-button" data-ja="条件をリセット" data-zh="重置条件">条件をリセット</button>
+          <button class="apply-button" data-ja="この条件で検索" data-zh="应用筛选">この条件で検索</button>
+        </div>
+      </div>
     </div>
     
     <div class="list-view">
@@ -1306,6 +1296,69 @@
           toast.remove();
         }, 2000);
       }
+
+      const targetButton = document.getElementById('targetButton');
+      const filterModal = document.getElementById('filterModal');
+      const closeButton = filterModal.querySelector('.close-button');
+      const resetButton = filterModal.querySelector('.reset-button');
+      const applyButton = filterModal.querySelector('.apply-button');
+
+      // 打开弹窗
+      targetButton.addEventListener('click', () => {
+        filterModal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+      });
+
+      // 关闭弹窗
+      function closeModal() {
+        filterModal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+
+      closeButton.addEventListener('click', closeModal);
+      filterModal.addEventListener('click', (e) => {
+        if (e.target === filterModal) {
+          closeModal();
+        }
+      });
+
+      // 重置按钮
+      resetButton.addEventListener('click', () => {
+        filterModal.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+          checkbox.checked = false;
+        });
+        filterModal.querySelectorAll('select').forEach(select => {
+          select.value = '';
+        });
+      });
+
+      // 应用按钮
+      applyButton.addEventListener('click', () => {
+        // 收集所有选中的值
+        const selectedValues = {
+          area: [],
+          lines: [],
+          price: {
+            min: document.getElementById('priceMin').value,
+            max: document.getElementById('priceMax').value
+          },
+          size: [],
+          rooms: [],
+          orientation: []
+        };
+
+        // 收集选中的值
+        filterModal.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+          // 根据不同部分收集值
+          // ...
+        });
+
+        // 关闭弹窗
+        closeModal();
+
+        // 更新筛选结果
+        // ...
+      });
     });
   </script>
 </body>
