@@ -367,19 +367,17 @@
       height: 100%;
       background-color: rgba(0, 0, 0, 0.5);
       z-index: 1000;
+      overflow-y: auto;
     }
 
     .modal-content {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      position: relative;
+      margin: 50px auto;
       background-color: white;
       width: 90%;
       max-width: 800px;
-      max-height: 90vh;
       border-radius: 8px;
-      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
     .modal-header {
@@ -413,16 +411,27 @@
       font-weight: bold;
     }
 
+    .filter-row {
+      margin-bottom: 20px;
+    }
+
+    .filter-row label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
     .checkbox-group {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
     }
 
     .checkbox-group label {
+      font-weight: normal;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
     }
 
     .scrollable {
@@ -562,10 +571,10 @@
               <div class="filter-row">
                 <label data-ja="都県" data-zh="都县">都県</label>
                 <div class="checkbox-group">
-                  <label><input type="checkbox" value="東京都">東京都</label>
-                  <label><input type="checkbox" value="神奈川県">神奈川県</label>
-                  <label><input type="checkbox" value="埼玉県">埼玉県</label>
-                  <label><input type="checkbox" value="千葉県">千葉県</label>
+                  <label><input type="checkbox" name="area" value="東京都">東京都</label>
+                  <label><input type="checkbox" name="area" value="神奈川県">神奈川県</label>
+                  <label><input type="checkbox" name="area" value="埼玉県">埼玉県</label>
+                  <label><input type="checkbox" name="area" value="千葉県">千葉県</label>
                 </div>
               </div>
               <div class="filter-row">
@@ -574,9 +583,9 @@
                   <!-- JR线路 -->
                   <div class="line-category">
                     <h5>JR線</h5>
-                    <label><input type="checkbox" value="山手線">山手線</label>
-                    <label><input type="checkbox" value="中央線">中央線</label>
-                    <label><input type="checkbox" value="総武線">総武線</label>
+                    <label><input type="checkbox" name="line" value="山手線">山手線</label>
+                    <label><input type="checkbox" name="line" value="中央線">中央線</label>
+                    <label><input type="checkbox" name="line" value="総武線">総武線</label>
                   </div>
                   <!-- 地铁线路 -->
                   <div class="line-category">
@@ -623,11 +632,11 @@
           <div class="filter-section">
             <h4 data-ja="間取り" data-zh="房型">間取り</h4>
             <div class="checkbox-group">
-              <label><input type="checkbox" value="1K">1R/1K</label>
-              <label><input type="checkbox" value="1LDK">1DK/1LDK</label>
-              <label><input type="checkbox" value="2K">2K/2DK</label>
-              <label><input type="checkbox" value="2LDK">2LDK</label>
-              <label><input type="checkbox" value="3LDK">3LDK以上</label>
+              <label><input type="checkbox" name="layout" value="1K">1R/1K</label>
+              <label><input type="checkbox" name="layout" value="1LDK">1DK/1LDK</label>
+              <label><input type="checkbox" name="layout" value="2K">2K/2DK</label>
+              <label><input type="checkbox" name="layout" value="2LDK">2LDK</label>
+              <label><input type="checkbox" name="layout" value="3LDK">3LDK以上</label>
             </div>
           </div>
 
@@ -635,10 +644,10 @@
           <div class="filter-section">
             <h4 data-ja="向き" data-zh="朝向">向き</h4>
             <div class="checkbox-group">
-              <label><input type="checkbox" value="south">南向き</label>
-              <label><input type="checkbox" value="east">東向き</label>
-              <label><input type="checkbox" value="west">西向き</label>
-              <label><input type="checkbox" value="north">北向き</label>
+              <label><input type="checkbox" name="orientation" value="south">南向き</label>
+              <label><input type="checkbox" name="orientation" value="east">東向き</label>
+              <label><input type="checkbox" name="orientation" value="west">西向き</label>
+              <label><input type="checkbox" name="orientation" value="north">北向き</label>
             </div>
           </div>
         </div>
@@ -1389,29 +1398,38 @@
       applyButton.addEventListener('click', () => {
         // 收集所有选中的值
         const selectedValues = {
-          area: [],
-          lines: [],
+          areas: Array.from(filterModal.querySelectorAll('input[name="area"]:checked')).map(cb => cb.value),
+          lines: Array.from(filterModal.querySelectorAll('input[name="line"]:checked')).map(cb => cb.value),
           price: {
             min: document.getElementById('priceMin').value,
             max: document.getElementById('priceMax').value
           },
-          size: [],
-          rooms: [],
-          orientation: []
+          sizes: Array.from(filterModal.querySelectorAll('input[name="size"]:checked')).map(cb => cb.value),
+          layouts: Array.from(filterModal.querySelectorAll('input[name="layout"]:checked')).map(cb => cb.value),
+          orientations: Array.from(filterModal.querySelectorAll('input[name="orientation"]:checked')).map(cb => cb.value)
         };
 
-        // 收集选中的值
-        filterModal.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
-          // 根据不同部分收集值
-          // ...
-        });
-
+        // 应用筛选条件
+        applyFilters(selectedValues);
+        
         // 关闭弹窗
         closeModal();
-
-        // 更新筛选结果
-        // ...
       });
+
+      // 添加筛选功能
+      function applyFilters(filters) {
+        const properties = document.querySelectorAll('.property-card');
+        
+        properties.forEach(property => {
+          let shouldShow = true;
+          
+          // 实现筛选逻辑
+          // ... 根据filters对象中的条件筛选房源 ...
+          
+          // 显示或隐藏房源
+          property.style.display = shouldShow ? '' : 'none';
+        });
+      }
 
       // 定义房源数据结构
       const RealEstateData = {
