@@ -1366,43 +1366,43 @@
       const applyButton = filterModal.querySelector('.apply-button');
 
       // 打开弹窗
-      targetButton.addEventListener('click', () => {
+      targetButton.onclick = function() {
         filterModal.style.display = 'block';
         document.body.style.overflow = 'hidden';
-      });
+      };
 
       // 关闭弹窗
-      function closeModal() {
+      closeButton.onclick = function() {
         filterModal.style.display = 'none';
         document.body.style.overflow = '';
-      }
+      };
 
-      closeButton.addEventListener('click', closeModal);
-      filterModal.addEventListener('click', (e) => {
+      // 点击弹窗外部关闭
+      filterModal.onclick = function(e) {
         if (e.target === filterModal) {
-          closeModal();
+          filterModal.style.display = 'none';
+          document.body.style.overflow = '';
         }
-      });
+      };
 
       // 重置按钮
-      resetButton.addEventListener('click', () => {
-        filterModal.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-          checkbox.checked = false;
-        });
-        filterModal.querySelectorAll('select').forEach(select => {
-          select.value = '';
-        });
-      });
+      resetButton.onclick = function() {
+        const checkboxes = filterModal.querySelectorAll('input[type="checkbox"]');
+        const selects = filterModal.querySelectorAll('select');
+        
+        checkboxes.forEach(checkbox => checkbox.checked = false);
+        selects.forEach(select => select.value = '');
+      };
 
       // 应用按钮
-      applyButton.addEventListener('click', () => {
+      applyButton.onclick = function() {
         // 收集所有选中的值
         const selectedValues = {
           areas: Array.from(filterModal.querySelectorAll('input[name="area"]:checked')).map(cb => cb.value),
           lines: Array.from(filterModal.querySelectorAll('input[name="line"]:checked')).map(cb => cb.value),
           price: {
-            min: document.getElementById('priceMin').value,
-            max: document.getElementById('priceMax').value
+            min: document.getElementById('priceMin')?.value || '',
+            max: document.getElementById('priceMax')?.value || ''
           },
           sizes: Array.from(filterModal.querySelectorAll('input[name="size"]:checked')).map(cb => cb.value),
           layouts: Array.from(filterModal.querySelectorAll('input[name="layout"]:checked')).map(cb => cb.value),
@@ -1413,18 +1413,42 @@
         applyFilters(selectedValues);
         
         // 关闭弹窗
-        closeModal();
-      });
+        filterModal.style.display = 'none';
+        document.body.style.overflow = '';
+      };
 
       // 添加筛选功能
       function applyFilters(filters) {
+        console.log('应用筛选条件:', filters);
         const properties = document.querySelectorAll('.property-card');
         
         properties.forEach(property => {
           let shouldShow = true;
           
-          // 实现筛选逻辑
-          // ... 根据filters对象中的条件筛选房源 ...
+          // 区域筛选
+          if (filters.areas.length > 0) {
+            const propertyArea = property.querySelector('.property-location')?.textContent || '';
+            shouldShow = shouldShow && filters.areas.some(area => propertyArea.includes(area));
+          }
+          
+          // 线路筛选
+          if (filters.lines.length > 0) {
+            const propertyLine = property.querySelector('.station-info')?.textContent || '';
+            shouldShow = shouldShow && filters.lines.some(line => propertyLine.includes(line));
+          }
+          
+          // 价格筛选
+          if (filters.price.min || filters.price.max) {
+            const priceText = property.querySelector('.property-price')?.textContent || '';
+            const price = parseInt(priceText.replace(/[^0-9]/g, ''));
+            
+            if (filters.price.min && price < parseInt(filters.price.min)) {
+              shouldShow = false;
+            }
+            if (filters.price.max && price > parseInt(filters.price.max)) {
+              shouldShow = false;
+            }
+          }
           
           // 显示或隐藏房源
           property.style.display = shouldShow ? '' : 'none';
