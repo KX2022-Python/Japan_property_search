@@ -971,56 +971,30 @@
       }
 
       // 修改更新按钮功能
+      const updater = new PropertyUpdater(new PropertyScraper(), new PropertyIntegrator());
+
       const updateButton = document.getElementById('updateButton');
       if(updateButton) {
         updateButton.addEventListener('click', async function() {
           try {
             // 显示加载状态
             updateButton.disabled = true;
-            const originalText = updateButton.textContent;
             updateButton.textContent = currentLang === 'ja' ? '更新中...' : '更新中...';
+
+            // 检查更新
+            const updates = await updater.checkForUpdates();
             
-            // 获取当前筛选条件
-            const filters = {
-              location: document.getElementById('location').value,
-              priceMin: document.getElementById('priceMin').value,
-              priceMax: document.getElementById('priceMax').value,
-              areaMin: document.getElementById('areaMin').value,
-              areaMax: document.getElementById('areaMax').value,
-              rooms: document.getElementById('rooms-select').value,
-              orientation: document.getElementById('orientation-select').value
-            };
-            
-            // 模拟数据更新过程
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            // 模拟检查是否有新数据（这里随机模拟）
-            const hasNewData = Math.random() > 0.5;
-            
-            if (hasNewData) {
-              // 模拟新数据，为部分房源添加NEW标签
-              const propertyCards = document.querySelectorAll('.property-card');
-              propertyCards.forEach(card => {
-                // 随机为30%的房源添加NEW标签
-                if (Math.random() < 0.3) {
-                  // 移除已有的NEW标签（如果存在）
-                  const existingBadge = card.querySelector('.new-badge');
-                  if (existingBadge) {
-                    existingBadge.remove();
-                  }
-                  
-                  // 添加新的NEW标签
-                  const newBadge = document.createElement('div');
-                  newBadge.className = 'new-badge';
-                  newBadge.textContent = 'NEW';
-                  card.querySelector('.property-image').appendChild(newBadge);
-                }
-              });
+            if (updates.hasUpdates) {
+              // 有更新时执行更新
+              const updateResults = await updater.updateAll();
               
-              // 显示更新成功提示
+              // 更新UI显示
+              renderProperties(updater.integrator.getAllProperties());
+              
+              // 显示更新统计
               const message = currentLang === 'ja' 
-                ? '最新のデータに更新されました。\n\n更新された情報源:\n- SUUMO\n- at home\n- HOMES\n- Yahoo!不動産'
-                : '数据已更新完成。\n\n已更新来源:\n- SUUMO\n- at home\n- HOMES\n- Yahoo!房产';
+                ? `更新完了:\n新規: ${updateResults.new}件\n更新: ${updateResults.updated}件\n\n更新された情報源:\n${Object.entries(updateResults.sources).map(([source, count]) => `- ${source}: ${count}件`).join('\n')}`
+                : `更新完成:\n新增: ${updateResults.new}条\n更新: ${updateResults.updated}条\n\n已更新来源:\n${Object.entries(updateResults.sources).map(([source, count]) => `- ${source}: ${count}条`).join('\n')}`;
               
               alert(message);
             } else {
@@ -1029,27 +1003,16 @@
               updateMessage.style.display = 'block';
               updateMessage.textContent = currentLang === 'ja' ? '現在のデータは最新です' : '目前已是最新数据';
               
-              // 1.5秒后自动隐藏提示
               setTimeout(() => {
                 updateMessage.style.display = 'none';
               }, 1500);
             }
-            
-            // 恢复按钮状态
-            updateButton.disabled = false;
-            updateButton.textContent = originalText;
-            
           } catch (error) {
-            // 发生错误时显示错误信息
-            const errorMessage = currentLang === 'ja'
-              ? 'データの更新中にエラーが発生しました。もう一度お試しください。'
-              : '数据更新过程中发生错误，请重试。';
-            
-            alert(errorMessage);
-            
+            alert(currentLang === 'ja' ? 'データの更新中にエラーが発生しました' : '数据更新失败');
+          } finally {
             // 恢复按钮状态
             updateButton.disabled = false;
-            updateButton.textContent = originalText;
+            updateButton.textContent = currentLang === 'ja' ? 'データを更新' : '更新数据';
           }
         });
       }
@@ -1358,6 +1321,209 @@
 
         // 更新筛选结果
         // ...
+      });
+
+      // 定义房源数据结构
+      const RealEstateData = {
+        properties: [
+          {
+            id: "suumo_123456",
+            sources: ["SUUMO"], // 数据来源
+            price: 12550, // 单位：万日元
+            location: {
+              prefecture: "東京都",
+              city: "新宿区",
+              address: "西新宿1-2-3",
+              station: {
+                name: "新宿駅",
+                line: "JR山手線",
+                walkingTime: 5 // 徒步分钟
+              },
+              coordinates: {
+                lat: 35.6894,
+                lng: 139.6917
+              }
+            },
+            specs: {
+              size: 35.8, // 平方米
+              layout: "1LDK",
+              floor: 15,
+              totalFloors: 30,
+              direction: "南東", // 朝向
+              buildingAge: 2018 // 建筑年份
+            },
+            building: {
+              type: "マンション", // 公寓类型
+              structure: "鉄筋コンクリート", // 建筑结构
+              totalUnits: 200 // 总户数
+            },
+            features: [
+              "オートロック",
+              "宅配ボックス",
+              "防犯カメラ",
+              "24時間ゴミ出し可"
+            ],
+            images: [
+              {
+                url: "https://picsum.photos/id/101/600/400",
+                type: "外観" // 图片类型：外观/室内等
+              }
+            ],
+            updatedAt: "2024-03-16T10:00:00Z"
+          }
+          // ... 更多房源数据
+        ]
+      };
+
+      // 添加数据渲染函数
+      function renderProperties(properties) {
+        const listView = document.querySelector('.list-view');
+        listView.innerHTML = ''; // 清空现有内容
+
+        properties.forEach(property => {
+          const card = createPropertyCard(property);
+          listView.appendChild(card);
+        });
+
+        // 如果地图视图已初始化，更新地图标记
+        if (map) {
+          updateMapMarkers(properties);
+        }
+      }
+
+      // 创建房源卡片
+      function createPropertyCard(property) {
+        const card = document.createElement('div');
+        card.className = 'property-card';
+        card.setAttribute('data-property-id', property.id);
+
+        // 格式化价格显示
+        const formattedPrice = new Intl.NumberFormat('ja-JP').format(property.price);
+        
+        // 计算数据来源数量
+        const sourceCount = property.sources.length;
+
+        card.innerHTML = `
+          <div class="property-image">
+            <div class="status-badge"></div>
+            <div class="favorite-btn" data-ja="お気に入り追加" data-zh="添加收藏">★</div>
+            <img src="${property.images[0].url}" alt="${property.location.address}">
+            <div class="source-count" style="position: absolute; top: 10px; right: 10px; background-color: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;" 
+                 data-ja="${sourceCount}つの情報源" data-zh="${sourceCount}个来源">
+              ${sourceCount}つの情報源
+            </div>
+          </div>
+          <div class="property-content">
+            <div class="property-price">${formattedPrice}万円</div>
+            <div class="property-location">
+              ${property.location.prefecture}${property.location.city}
+              <div class="station-info">
+                ${property.location.station.line} ${property.location.station.name} 徒歩${property.location.station.walkingTime}分
+              </div>
+            </div>
+            <div class="property-specs">
+              <span>${property.specs.size}㎡</span>
+              <span>${property.specs.layout}</span>
+              <span>築${new Date().getFullYear() - property.specs.buildingAge}年</span>
+              <span>${property.specs.direction}</span>
+            </div>
+            <div class="property-features">
+              ${property.features.slice(0, 3).map(feature => 
+                `<span class="feature-tag">${feature}</span>`
+              ).join('')}
+            </div>
+            <div class="property-sources">
+              ${property.sources.map(source => 
+                `<a href="#" class="source-link">${source}</a>`
+              ).join('')}
+            </div>
+          </div>
+        `;
+
+        // 添加交互功能
+        initializeCardInteractions(card, property);
+
+        return card;
+      }
+
+      // 初始化卡片交互功能
+      function initializeCardInteractions(card, property) {
+        const favoriteBtn = card.querySelector('.favorite-btn');
+        const statusBadge = card.querySelector('.status-badge');
+
+        // 检查是否是新上架的房源（24小时内）
+        const isNew = (new Date() - new Date(property.updatedAt)) < 24 * 60 * 60 * 1000;
+        if (isNew) {
+          const newBadge = document.createElement('div');
+          newBadge.className = 'new-badge';
+          newBadge.textContent = 'NEW';
+          statusBadge.appendChild(newBadge);
+        }
+
+        // 添加收藏功能
+        favoriteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleFavorite(property.id, favoriteBtn);
+        });
+
+        // 添加查看功能
+        card.addEventListener('click', () => {
+          markAsViewed(property.id, statusBadge);
+        });
+      }
+
+      // 更新地图标记
+      function updateMapMarkers(properties) {
+        // 清除现有标记
+        markers.forEach(marker => marker.setMap(null));
+        markers = [];
+
+        // 添加新标记
+        properties.forEach(property => {
+          const marker = new google.maps.Marker({
+            position: property.location.coordinates,
+            map: map,
+            animation: google.maps.Animation.DROP
+          });
+
+          // 创建信息窗口内容
+          const infoWindow = new google.maps.InfoWindow({
+            content: createInfoWindowContent(property)
+          });
+
+          marker.addListener('click', () => {
+            infoWindow.open(map, marker);
+          });
+
+          markers.push(marker);
+        });
+      }
+
+      // 创建信息窗口内容
+      function createInfoWindowContent(property) {
+        return `
+          <div class="map-info-window">
+            <img src="${property.images[0].url}" alt="${property.location.address}" 
+                 style="width: 200px; height: 150px; object-fit: cover; border-radius: 4px;">
+            <div style="padding: 10px;">
+              <div style="font-size: 1.2rem; font-weight: bold; color: #ff4d4d;">
+                ${new Intl.NumberFormat('ja-JP').format(property.price)}万円
+              </div>
+              <div style="font-size: 0.9rem; margin: 5px 0;">
+                ${property.location.station.line} ${property.location.station.name} 徒歩${property.location.station.walkingTime}分
+              </div>
+              <div style="font-size: 0.9rem;">
+                ${property.specs.size}㎡ / ${property.specs.layout}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 初始化数据
+      document.addEventListener('DOMContentLoaded', () => {
+        // 渲染初始数据
+        renderProperties(RealEstateData.properties);
       });
     });
   </script>
