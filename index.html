@@ -479,6 +479,33 @@
       border-radius: 4px;
       width: 150px;
     }
+
+    .update-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .update-button:hover {
+      background-color: #45a049;
+    }
+
+    .update-button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .update-icon {
+      font-size: 20px;
+    }
   </style>
 </head>
 <body>
@@ -507,10 +534,15 @@
       <button data-ja="地図表示" data-zh="地图视图">地図表示</button>
     </div>
     
-    <div class="filters">
+    <div class="filters" style="display: flex; justify-content: space-between; align-items: center;">
       <button id="targetButton" class="target-button" data-ja="目標を設定" data-zh="设置目标">
         <span class="target-icon">🎯</span>
         <span class="target-text" data-ja="目標を設定" data-zh="设置目标">目標を設定</span>
+      </button>
+      
+      <button id="updateButton" class="update-button" data-ja="データを更新" data-zh="更新数据">
+        <span class="update-icon">🔄</span>
+        <span class="update-text" data-ja="データを更新" data-zh="更新数据">データを更新</span>
       </button>
     </div>
 
@@ -928,11 +960,10 @@
           }
         });
       });
-      
       // 筛选器重置功能
-      const resetButton = document.querySelector('button[type="button"]');
-      if(resetButton) {
-        resetButton.addEventListener('click', function() {
+      const resetButtonFilter = document.querySelector('button[type="button"]');
+      if(resetButtonFilter) {
+        resetButtonFilter.addEventListener('click', function() {
           document.querySelectorAll('input, select').forEach(input => {
             input.value = '';
           });
@@ -970,52 +1001,112 @@
         });
       }
 
-      // 修改更新按钮功能
-      const updater = new PropertyUpdater(new PropertyScraper(), new PropertyIntegrator());
-
-      const updateButton = document.getElementById('updateButton');
-      if(updateButton) {
-        updateButton.addEventListener('click', async function() {
-          try {
-            // 显示加载状态
-            updateButton.disabled = true;
-            updateButton.textContent = currentLang === 'ja' ? '更新中...' : '更新中...';
-
-            // 检查更新
-            const updates = await updater.checkForUpdates();
-            
-            if (updates.hasUpdates) {
-              // 有更新时执行更新
-              const updateResults = await updater.updateAll();
-              
-              // 更新UI显示
-              renderProperties(updater.integrator.getAllProperties());
-              
-              // 显示更新统计
-              const message = currentLang === 'ja' 
-                ? `更新完了:\n新規: ${updateResults.new}件\n更新: ${updateResults.updated}件\n\n更新された情報源:\n${Object.entries(updateResults.sources).map(([source, count]) => `- ${source}: ${count}件`).join('\n')}`
-                : `更新完成:\n新增: ${updateResults.new}条\n更新: ${updateResults.updated}条\n\n已更新来源:\n${Object.entries(updateResults.sources).map(([source, count]) => `- ${source}: ${count}条`).join('\n')}`;
-              
-              alert(message);
-            } else {
-              // 显示无更新提示
-              const updateMessage = document.getElementById('updateMessage');
-              updateMessage.style.display = 'block';
-              updateMessage.textContent = currentLang === 'ja' ? '現在のデータは最新です' : '目前已是最新数据';
-              
-              setTimeout(() => {
-                updateMessage.style.display = 'none';
-              }, 1500);
+      // 添加测试数据更新功能
+      function getTestData() {
+        // 模拟从不同来源获取的测试数据
+        const testData = {
+          SUUMO: [
+            {
+              id: "suumo_" + Date.now(),
+              sources: ["SUUMO"],
+              price: Math.floor(Math.random() * 20000) + 5000,
+              location: {
+                prefecture: "東京都",
+                city: "新宿区",
+                address: "西新宿" + Math.floor(Math.random() * 10) + "-" + Math.floor(Math.random() * 10),
+                station: {
+                  name: "新宿駅",
+                  line: "JR山手線",
+                  walkingTime: Math.floor(Math.random() * 15) + 1
+                },
+                coordinates: {
+                  lat: 35.6894 + (Math.random() - 0.5) * 0.01,
+                  lng: 139.6917 + (Math.random() - 0.5) * 0.01
+                }
+              },
+              specs: {
+                size: Math.floor(Math.random() * 60) + 20,
+                layout: ["1K", "1LDK", "2DK", "2LDK", "3LDK"][Math.floor(Math.random() * 5)],
+                floor: Math.floor(Math.random() * 30) + 1,
+                totalFloors: 30,
+                direction: ["南", "東", "西", "北", "南東", "南西"][Math.floor(Math.random() * 6)],
+                buildingAge: 2024 - Math.floor(Math.random() * 20)
+              },
+              features: [
+                "オートロック",
+                "宅配ボックス",
+                "防犯カメラ",
+                "24時間ゴミ出し可"
+              ],
+              images: [
+                {
+                  url: `https://picsum.photos/id/${Math.floor(Math.random() * 100)}/600/400`,
+                  type: "外観"
+                }
+              ],
+              updatedAt: new Date().toISOString()
             }
-          } catch (error) {
-            alert(currentLang === 'ja' ? 'データの更新中にエラーが発生しました' : '数据更新失败');
-          } finally {
-            // 恢复按钮状态
-            updateButton.disabled = false;
-            updateButton.textContent = currentLang === 'ja' ? 'データを更新' : '更新数据';
-          }
-        });
+          ]
+        };
+
+        return testData;
       }
+
+      // 修改更新按钮功能
+      document.getElementById('updateButton').addEventListener('click', async function() {
+        try {
+          // 显示加载状态
+          this.disabled = true;
+          const originalText = this.querySelector('.update-text').textContent;
+          this.querySelector('.update-text').textContent = currentLang === 'ja' ? '更新中...' : '更新中...';
+          
+          // 模拟数据获取延迟
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          
+          // 获取测试数据
+          const newData = getTestData();
+          
+          // 随机决定是否有更新
+          const hasUpdates = Math.random() > 0.3;
+          
+          if (hasUpdates) {
+            // 添加新数据到现有列表
+            const listView = document.querySelector('.list-view');
+            newData.SUUMO.forEach(property => {
+              const card = createPropertyCard(property);
+              listView.insertBefore(card, listView.firstChild);
+            });
+            
+            // 如果地图视图已初始化，更新地图标记
+            if (map) {
+              updateMapMarkers([...newData.SUUMO, ...RealEstateData.properties]);
+            }
+            
+            // 显示更新成功提示
+            const message = currentLang === 'ja' 
+              ? `更新完了:\n新規: ${newData.SUUMO.length}件\n\n更新された情報源:\n- SUUMO: ${newData.SUUMO.length}件`
+              : `更新完成:\n新增: ${newData.SUUMO.length}条\n\n已更新来源:\n- SUUMO: ${newData.SUUMO.length}条`;
+            
+            alert(message);
+          } else {
+            // 显示无更新提示
+            const updateMessage = document.getElementById('updateMessage');
+            updateMessage.style.display = 'block';
+            updateMessage.textContent = currentLang === 'ja' ? '現在のデータは最新です' : '目前已是最新数据';
+            
+            setTimeout(() => {
+              updateMessage.style.display = 'none';
+            }, 1500);
+          }
+        } catch (error) {
+          console.error('更新失败:', error);
+          alert(currentLang === 'ja' ? 'データの更新中にエラーが発生しました' : '数据更新失败');
+        } finally {
+          // 恢复按钮状态
+          this.disabled = false;
+          this.querySelector('.update-text').textContent = currentLang === 'ja' ? 'データを更新' : '更新数据';
+        }
+      });
 
       // 添加地图相关功能
       let map;
@@ -1204,7 +1295,6 @@
           this.classList.toggle('active');
           this.classList.add('favorite-animation');
           
-          // 移除动画类
           setTimeout(() => {
             this.classList.remove('favorite-animation');
           }, 300);
@@ -1212,14 +1302,14 @@
           if (this.classList.contains('active')) {
             if (!favoriteProperties.includes(propertyId)) {
               favoriteProperties.push(propertyId);
+              localStorage.setItem('favoriteProperties', JSON.stringify(favoriteProperties));
               showToast(currentLang === 'ja' ? 'お気に入りに追加しました' : '已添加到收藏');
             }
           } else {
             favoriteProperties = favoriteProperties.filter(id => id !== propertyId);
+            localStorage.setItem('favoriteProperties', JSON.stringify(favoriteProperties));
             showToast(currentLang === 'ja' ? 'お気に入りから削除しました' : '已从收藏中移除');
           }
-          
-          localStorage.setItem('favoriteProperties', JSON.stringify(favoriteProperties));
         });
       });
       
@@ -1450,6 +1540,7 @@
       function initializeCardInteractions(card, property) {
         const favoriteBtn = card.querySelector('.favorite-btn');
         const statusBadge = card.querySelector('.status-badge');
+        const propertyId = property.id;
 
         // 检查是否是新上架的房源（24小时内）
         const isNew = (new Date() - new Date(property.updatedAt)) < 24 * 60 * 60 * 1000;
@@ -1463,12 +1554,88 @@
         // 添加收藏功能
         favoriteBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          toggleFavorite(property.id, favoriteBtn);
+          
+          favoriteBtn.classList.toggle('active');
+          favoriteBtn.classList.add('favorite-animation');
+          
+          setTimeout(() => {
+            favoriteBtn.classList.remove('favorite-animation');
+          }, 300);
+          
+          if (favoriteBtn.classList.contains('active')) {
+            if (!favoriteProperties.includes(propertyId)) {
+              favoriteProperties.push(propertyId);
+              localStorage.setItem('favoriteProperties', JSON.stringify(favoriteProperties));
+              showToast(currentLang === 'ja' ? 'お気に入りに追加しました' : '已添加到收藏');
+            }
+          } else {
+            favoriteProperties = favoriteProperties.filter(id => id !== propertyId);
+            localStorage.setItem('favoriteProperties', JSON.stringify(favoriteProperties));
+            showToast(currentLang === 'ja' ? 'お気に入りから削除しました' : '已从收藏中移除');
+          }
         });
 
         // 添加查看功能
         card.addEventListener('click', () => {
-          markAsViewed(property.id, statusBadge);
+          if (!viewedProperties.includes(propertyId)) {
+            viewedProperties.push(propertyId);
+            localStorage.setItem('viewedProperties', JSON.stringify(viewedProperties));
+            updateViewedStatus(statusBadge, true);
+          }
+          
+          // 这里可以添加显示详细信息的逻辑
+          showPropertyDetail(property);
+        });
+      }
+
+      // 添加显示房源详细信息的函数
+      function showPropertyDetail(property) {
+        // 创建详细信息弹窗
+        const detailModal = document.createElement('div');
+        detailModal.className = 'property-detail-modal';
+        detailModal.innerHTML = `
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>${property.location.address}</h3>
+              <button class="close-button">&times;</button>
+            </div>
+            <div class="modal-body">
+              <!-- 添加详细信息内容 -->
+              <div class="property-images">
+                <img src="${property.images[0].url}" alt="物件画像">
+              </div>
+              <div class="property-info">
+                <div class="price">${new Intl.NumberFormat('ja-JP').format(property.price)}万円</div>
+                <div class="location">
+                  ${property.location.station.line} ${property.location.station.name} 徒歩${property.location.station.walkingTime}分
+                </div>
+                <div class="specs">
+                  <div>${property.specs.size}㎡</div>
+                  <div>${property.specs.layout}</div>
+                  <div>${property.specs.direction}</div>
+                  <div>築${new Date().getFullYear() - property.specs.buildingAge}年</div>
+                </div>
+                <div class="features">
+                  ${property.features.map(feature => `<span class="feature-tag">${feature}</span>`).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(detailModal);
+
+        // 添加关闭功能
+        const closeButton = detailModal.querySelector('.close-button');
+        closeButton.addEventListener('click', () => {
+          detailModal.remove();
+        });
+
+        // 点击模态框外部关闭
+        detailModal.addEventListener('click', (e) => {
+          if (e.target === detailModal) {
+            detailModal.remove();
+          }
         });
       }
 
